@@ -1,0 +1,11 @@
+---
+- name: Prune users
+  community.mysql.mysql_user:
+    name: '{{ inner_item.User }}'
+    host: '{{ inner_item.Host }}'
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop: '{{ item.1 }}'
+  loop_control:
+    loop_var: inner_item
+  become: yes

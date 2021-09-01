@@ -1,0 +1,84 @@
+---
+- name: install Packages
+  apt:
+    name:
+      - mariadb-client
+      - mariadb-server
+      - python3-pymysql
+    update_cache: yes
+  become: yes
+
+- name: Config File
+  copy:
+    src: 50-server.cnf
+    dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+  become: yes
+  notify:
+    - Restart MariaDB
+
+- name: Generate SSL Certificates
+  include_role:
+    name: signed_certificate
+  vars:
+    cert_name: mysql
+    ca_path: /etc/mysql
+    key_path: /etc/mysql
+    cert_path: /etc/mysql
+    owner: mysql
+    group: mysql
+
+- name: Check for changed cert
+  command: /bin/true
+  when:
+    - cert_changed
+  notify:
+    - Restart MariaDB
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Securing the installation
+  community.mysql.mysql_query:
+    query:
+      - "DELETE FROM mysql.user WHERE User=''"
+      - "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+      - "DROP DATABASE IF EXISTS test"
+      - "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'"
+      - "FLUSH PRIVILEGES"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+
+- name: Create Databases
+  community.mysql.mysql_db:
+    name: '{{ item }}'
+    state: present
+    encoding: utf8
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop: '{{ dbs }}'
+  become: yes
+
+- name: Create Users
+  community.mysql.mysql_user:
+    name: '{{ item.key }}'
+    password: '{{ vault_db_users_pw[ ansible_facts.fqdn ][ item.key ] }}'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  args: '{{ item.value }}'
+  with_dict: '{{ db_users }}'
+  become: yes
+
+# Not great, but the only way to do custom nested loops
+
+- name: get to prune users
+  community.mysql.mysql_query:
+    query:
+      - "SELECT User,Host FROM mysql.user WHERE User='{{ item.key }}' AND Host!='{{ item.value.host }}'"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_dict: '{{ db_users }}'
+  register: sql_prune_users
+  become: yes
+
+- name: Prune users
+  include_tasks: prune_users.yml
+  with_subelements:
+    - '{{ sql_prune_users.results }}'
+    - query_result

@@ -1,0 +1,17 @@
+# This file is managed by Ansible. Do not change.
+
+SSLEngine on
+
+SSLProtocol -all +TLSv1.2 +TLSv1.3
+
+SSLCertificateFile {{ apache_ssl_cert }}
+SSLCertificateKeyFile {{ apache_ssl_key }}
+
+<FilesMatch "\.(cgi|shtml|phtml|php)$">
+		SSLOptions +StdEnvVars
+</FilesMatch>
+<Directory /usr/lib/cgi-bin>
+		SSLOptions +StdEnvVars
+</Directory>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

@@ -1,0 +1,24 @@
+<IfModule mod_ssl.c>
+	<VirtualHost _default_:443>
+		ServerAdmin webmaster@localhost
+
+		ServerName {{ item.value.hostname }}
+
+{% if item.value.ssl is defined and item.value.ssl is sameas true %}
+		SSLProxyEngine on
+		SSLProxyVerify require
+		SSLProxyCACertificateFile "/etc/ssl/certs/ca-certificates.crt"
+		SSLProxyCheckPeerCN on
+		SSLProxyVerifyDepth 10
+{% endif %}
+
+		ProxyPass / {{ item.value.proxy }}
+		ProxyPassReverse / {{ item.value.proxy }}
+
+		{{ item.value.apache_custom_conf | default("") }}
+
+		Include ssl.conf
+	</VirtualHost>
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

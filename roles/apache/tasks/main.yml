@@ -1,0 +1,152 @@
+---
+- name: Install SURY.ORG package signing key
+  get_url:
+    url: https://packages.sury.org/php/apt.gpg
+    dest: /etc/apt/trusted.gpg.d/sury.gpg
+  become: yes
+
+- name: Install SURY.ORG php package repository
+  copy:
+    dest: /etc/apt/sources.list.d/sury.list
+    content: 'deb https://packages.sury.org/php/ {{ ansible_facts.distribution_release }} main'
+  become: yes
+
+- name: Install general packages
+  apt:
+    name: '{{ ["apache2", "libapache2-mpm-itk"] + php_versions }}'
+    update_cache: yes
+  become: yes
+
+- name: Install extensions
+  apt:
+    name: '{{ php_versions | product(php_extensions) | map("join", "-") }}'
+  become: yes
+
+# ignore errors bc apache2_module checks fails for errors in config (why???)
+- name: Enable apache2 modules
+  community.general.apache2_module:
+    name: '{{ item }}'
+    state: present
+  loop: '{{ apache_mods }}'
+  ignore_errors: yes
+  become: yes
+  notify: Restart apache
+
+- name: Check for changed cert
+  command: /bin/true
+  when:
+    - cert_changed
+  notify:
+    - Restart apache
+
+- name: Check for php module
+  find:
+    paths: '/etc/apache2/mods-enabled/'
+    patterns: 'php*'
+    file_type: any
+  become: yes
+  register: a2_mod_php
+
+- name: Disable apache2 mod php
+  file:
+    path: '{{ item.path }}'
+    follow: no
+    state: absent
+  become: yes
+  loop: '{{ a2_mod_php.files }}'
+  notify: Restart apache
+
+- name: Install SSL config
+  template:
+    src: ssl.conf.j2
+    dest: /etc/apache2/ssl.conf
+  become: yes
+  notify: Restart apache
+
+- name: Remove default-ssl
+  file:
+    path: '/etc/apache2/{{ item }}/default-ssl.conf'
+    follow: no
+    state: absent
+  become: yes
+  loop:
+    - sites-available
+    - sites-enabled
+  notify: Reload apache
+
+- name: Install default sites
+  copy:
+    src: '{{ item }}'
+    dest: '/etc/apache2/sites-available/{{ item }}'
+  become: yes
+  loop:
+    - 000-default-ssl.conf
+    - 000-default.conf
+  notify: Reload apache
+
+- name: Install vhost configs
+  template:
+    src: vhost.conf.j2
+    dest: '/etc/apache2/sites-available/{{ item.key }}.conf'
+  with_dict: '{{ apache_vhosts }}'
+  become: yes
+  notify: Reload apache
+
+- name: Install noPHP vhost configs
+  template:
+    src: vhost_nophp.conf.j2
+    dest: '/etc/apache2/sites-available/{{ item.key }}.conf'
+  with_dict: '{{ apache_nophp_vhosts }}'
+  become: yes
+  notify: Reload apache
+
+- name: Install proxy configs
+  template:
+    src: proxy.conf.j2
+    dest: '/etc/apache2/sites-available/{{ item.key }}.conf'
+  with_dict: '{{ apache_rproxies }}'
+  become: yes
+  notify: Reload apache
+
+- name: Create site users
+  user:
+    name: 'www-{{ item }}'
+    shell: /usr/sbin/nologin
+    system: yes
+    home: '/var/www/{{ item }}'
+  become: yes
+  with_items: '{{ apache_vhosts.keys() | list }}'
+
+- name: chmod site dirs
+  file:
+    path: '/var/www/{{ item }}'
+    mode: '750'
+  become: yes
+  with_items: '{{ apache_vhosts.keys() | list }}'
+
+- name: Create noPHP site dirs
+  file:
+    path: '/var/www/{{ item }}'
+    mode: '750'
+    owner: www-data
+    group: www-data
+    state: directory
+  become: yes
+  with_items: '{{ apache_nophp_vhosts.keys() | list }}'
+
+- name: Create FPM Pools
+  template:
+    src: fpm-pool.conf.j2
+    dest: '/etc/php/{{ item.value.php_version }}/fpm/pool.d/www-{{ item.key }}.conf'
+  become: yes
+  with_dict: '{{ apache_vhosts }}'
+  notify: Restart fpm
+
+- name: Enable sites
+  file:
+    path: '/etc/apache2/sites-enabled/{{ item }}.conf'
+    state: link
+    src: '../sites-available/{{ item }}.conf'
+  become: yes
+  notify: Reload apache
+  with_items: '{{ apache_vhosts.keys() | list + apache_rproxies.keys() | list + apache_nophp_vhosts.keys() | list + ["000-default", "000-default-ssl"]  }}'

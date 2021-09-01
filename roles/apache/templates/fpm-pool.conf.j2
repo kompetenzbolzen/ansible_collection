@@ -1,0 +1,15 @@
+[www-{{ item.key }}]
+    user = www-{{ item.key }}
+    group = www-{{ item.key }}
+    listen = /run/php/php{{ item.value.php_version }}-fpm.www-{{ item.key }}.sock
+    listen.owner = www-{{ item.key }}
+    listen.group = www-{{ item.key }}
+    listen.mode = 0600
+
+    pm = dynamic
+    pm.max_children = {{ item.value.fpm.max_children | default("5") }}
+    pm.start_servers = {{ item.value.fpm.start_servers | default("2") }}
+    pm.min_spare_servers = {{ item.value.fpm.min_spare_servers | default("1") }}
+    pm.max_spare_servers = {{ item.value.fpm.max_spare_servers | default("3") }}
+
+{{ item.value.php_custom_conf | default("") }}

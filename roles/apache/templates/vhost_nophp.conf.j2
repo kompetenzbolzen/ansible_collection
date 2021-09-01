@@ -1,0 +1,21 @@
+# This file is managed by Ansible. Do not change.
+
+<IfModule mod_ssl.c>
+	<VirtualHost _default_:443>
+		ServerName {{ item.value.hostname }}
+	
+		ServerAdmin webmaster@localhost
+		DocumentRoot /var/www/{{ item.key }}/{{ item.value.relative_root }}
+
+		<Directory /var/www/{{ item.key }}>
+			AllowOverride All
+			Require all granted
+		</Directory>
+
+		Include ssl.conf
+
+		{{ item.value.apache_custom_conf | default("") }}
+	</VirtualHost>
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

@@ -1,0 +1,17 @@
+---
+php_versions: []
+
+php_extensions: []
+
+# Removing will NOT remove the module
+apache_mods: []
+
+apache_rproxies: {}
+
+# Hosts WITH PHP, run as seperate user
+apache_vhosts: {}
+
+apache_nophp_vhosts: {}
+
+apache_ssl_cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+apache_ssl_key: '/etc/ssl/private/ssl-cert-snakeoil.key'

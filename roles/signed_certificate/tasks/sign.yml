@@ -1,0 +1,31 @@
+---
+- name: Create CSR
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: '{{ key_path }}/{{ cert_name }}.key'
+    common_name: '{{ ansible_facts.fqdn }}'
+    subject_alt_name: '{{ alt_name }}'
+  register: request
+  become: yes
+
+- name: Sign OpenSSL Certificate
+  community.crypto.x509_certificate_pipe:
+    provider: ownca
+    ownca_privatekey_path: '{{ signed_certificate.privkey_path }}'
+    ownca_privatekey_passphrase: '{{ signed_certificate.privkey_passphrase }}'
+    ownca_content: '{{ signed_certificate.cert_content }}'
+    ownca_not_after: '{{ signed_certificate.valid_for }}'
+    csr_content: '{{ request.csr }}'
+  delegate_to: localhost
+  register: cert
+
+- name: Install Signed OpenSSL Certificate
+  copy:
+    dest: '{{ cert_path }}/{{ cert_name }}.pem'
+    content: '{{ cert.certificate }}'
+    owner: '{{ owner }}'
+    group: '{{ group }}'
+  become: yes
+
+- name: Set cert_changed flag
+  set_fact:
+    cert_changed: True

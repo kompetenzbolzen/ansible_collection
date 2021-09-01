@@ -1,0 +1,50 @@
+---
+- name: Unset cert_changed flag
+  set_fact:
+    cert_changed: False
+
+- name: Instaall crypt libs
+  apt:
+    name:
+      - python3-cryptography
+  become: yes
+
+- name: Check for OpenSSL Private Key
+  community.crypto.openssl_privatekey_info:
+    path: '{{ key_path }}/{{ cert_name }}.key'
+  ignore_errors: yes
+  become: yes
+  register: key_check
+
+- name: Create OpenSSL Private Key
+  community.crypto.openssl_privatekey:
+    path: '{{ key_path }}/{{ cert_name }}.key'
+    owner: '{{ owner }}'
+    group: '{{ group }}'
+  become: yes
+  when: key_check.failed
+
+- name: Read existing Certificate
+  community.crypto.x509_certificate_info:
+    path: '{{ cert_path }}/{{ cert_name }}.pem'
+    valid_at:
+      point_1: '{{ signed_certificate.renew_at }}'
+  ignore_errors: yes
+  become: yes
+  register: existing_cert
+
+- name: Check certificate
+  assert:
+    that:
+      - existing_cert.valid_at.point_1
+      - not existing_cert.failed
+      - existing_cert.subject.commonName == ansible_facts.fqdn
+      - existing_cert.issuer.commonName == '{{ signed_certificate.issuer_cn }}'
+    success_msg: Certificate is valid
+    fail_msg: Certificate is not valid. creating a new one.
+  ignore_errors: yes
+  register: cert_assert
+
+- name: Trigger Cert generation
+  include: sign.yml
+  when: cert_assert.failed

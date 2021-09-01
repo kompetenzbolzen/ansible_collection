@@ -1,0 +1,1 @@
+# Ansible Collection - kompetenzbolzen.stuff

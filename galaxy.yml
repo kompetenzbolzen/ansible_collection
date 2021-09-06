@@ -1,6 +1,6 @@
 namespace: kompetenzbolzen
 name: stuff
-version: 0.0.1
+version: 0.0.2
 readme: README.md
 authors:
 - Jonas Gunz <himself@jonasgunz.de>
@@ -17,6 +17,7 @@ tags:
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
 dependencies:
+  community.general: '>=3.6.0'
   community.crypto: '>=1.8.0'
 #build_ignore: []
 

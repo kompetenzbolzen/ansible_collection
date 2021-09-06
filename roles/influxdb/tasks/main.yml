@@ -1,0 +1,74 @@
+---
+- name: Install GnuPG
+  apt:
+    update_cache: yes
+    name:
+      - gnupg2
+  become: yes
+
+- name: APT Key
+  apt_key:
+    url: 'https://repos.influxdata.com/influxdb.key'
+    state: present
+  become: yes
+
+- name: Install repos
+  template:
+    src: influxdb.list.j2
+    dest: /etc/apt/sources.list.d/influxdb.list
+  become: yes
+
+- name: Install Packages
+  apt:
+    update_cache: yes
+    name:
+      - curl
+      - python3-influxdb
+      - influxdb
+  become: yes
+
+- name: InfluxDB user setup
+  user:
+    name: influxdb
+    groups:
+      - ssl-cert
+    append: yes
+  become: yes
+
+- name: Install configuration
+  template:
+    src: influxdb.conf.j2
+    dest: /etc/influxdb/influxdb.conf
+  become: yes
+  notify: Restart influxdb
+
+- name: Check for changed cert
+  command: /bin/true
+  when:
+    - cert_changed
+  notify:
+    - Restart influxdb
+
+- name: create Influx DBs
+  influxdb_database:
+    database_name: '{{ item }}'
+    hostname: localhost
+    port: 8086
+    ssl: yes
+    validate_certs: no
+    state: present
+  with_items: '{{ influx_dbs }}'
+  become: yes
+
+- name: create Influx Users
+  influxdb_user:
+    user_name: '{{ item.key }}'
+    user_password: '{{ item.value.password }}'
+    grants: '{{ item.value.grants }}'
+    hostname: localhost
+    port: 8086
+    ssl: yes
+    validate_certs: no
+    state: present
+  with_dict: '{{ influx_users }}'
+  become: yes

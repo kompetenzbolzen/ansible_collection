@@ -1,0 +1,42 @@
+# Managed by Ansible. Do not change.
+
+[meta]
+  dir = "/var/lib/influxdb/meta"
+
+[data]
+  dir = "/var/lib/influxdb/data"
+  wal-dir = "/var/lib/influxdb/wal"
+  series-id-set-cache-size = 100
+
+[coordinator]
+
+[retention]
+
+[shard-precreation]
+
+[monitor]
+
+[http]
+  enabled = true
+  bind-address = ":8086"
+
+  https-enabled = {{ influx.https_enabled | lower }}
+
+  https-certificate = "{{ influx.https_cert }}"
+  https-private-key = "{{ influx.https_key }}"
+
+[logging]
+
+[subscriber]
+
+[[graphite]]
+
+[[collectd]]
+
+[[opentsdb]]
+
+[[udp]]
+
+[continuous_queries]
+
+[tls]

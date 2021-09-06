@@ -1,0 +1,10 @@
+---
+influx:
+  https_enabled: false
+  https_cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+  https_key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+
+influx_dbs: []
+
+influx_users: {}
+

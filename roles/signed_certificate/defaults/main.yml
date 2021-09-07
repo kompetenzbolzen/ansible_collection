@@ -4,7 +4,7 @@ key_path: '/etc/ssl/private/'
 cert_path: '/etc/ssl/certs/'
 alt_name: '{{  "DNS:" + ansible_facts.fqdn  }}'
 owner: root
-group: root
+group: ssl-cert
 
 signed_certificate:
   issuer_cn: ''

@@ -21,8 +21,19 @@
     path: '{{ key_path }}/{{ cert_name }}.key'
     owner: '{{ owner }}'
     group: '{{ group }}'
+    mode: '640'
   become: yes
   when: key_check.failed
+
+- name: Check file permissions for Key
+  file:
+    path: '{{ key_path }}/{{ cert_name }}.key'
+    state: file
+    owner: '{{ owner }}'
+    group: '{{ group }}'
+    mode: '640'
+  become: yes
+  when: not key_check.failed
 
 - name: Read existing Certificate
   community.crypto.x509_certificate_info:

@@ -74,4 +74,5 @@
     validate_certs: no
     state: present
   with_dict: '{{ influx_users }}'
+  no_log: yes
   become: yes

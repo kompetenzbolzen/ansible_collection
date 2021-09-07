@@ -49,6 +49,9 @@
   notify:
     - Restart influxdb
 
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: create Influx DBs
   influxdb_database:
     database_name: '{{ item }}'

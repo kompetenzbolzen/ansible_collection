@@ -1,0 +1,6 @@
+---
+- name: Restart sssd
+  systemd:
+    name: sssd
+    state: restarted
+  become: yes

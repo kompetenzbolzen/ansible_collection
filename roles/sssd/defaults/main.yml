@@ -1,0 +1,10 @@
+---
+sssd_ldap:
+  host: 'ldaps://ldap.example.com'
+  start_tls: False
+  bind_dn: 'cn=sssd,dc=example,dc=com'
+  bind_pw: 'password'
+  base_dn: 'dc=example,dc=com'
+  user_dn: 'ou=users,dc=example,dc=com'
+  group_dn: 'ou=groups,dc=example,dc=com'
+  access_filter: '&(objectClass=posixAccount)'

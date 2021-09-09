@@ -1,0 +1,38 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - sssd
+      - libpam-sss
+      - libnss-sss
+    update_cache: yes
+  become: yes
+
+- name: Install SSSD Config file
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    mode: '600'
+  become: yes
+  notify: Restart sssd
+
+- name: Create LDAP Config dir
+  file:
+    path: /etc/ldap
+    state: directory
+  become: yes
+
+- name: Install ldap.conf
+  copy:
+    content: 'TLS_CACERT      /etc/ssl/certs/ca-certificates.crt'
+    dest: /etc/ldap/ldap.conf
+  become: yes
+  notify: Restart sssd
+
+- name: Auto-create Homedir
+  lineinfile:
+    path: /etc/pam.d/common-session
+    regex: '^session required pam_mkhomedir\.so'
+    line: 'session required pam_mkhomedir.so skel=/etc/skel/ umask=0022'
+    insertafter: '^session optional pam_sss\.so'
+  become: yes

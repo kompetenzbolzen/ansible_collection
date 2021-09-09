@@ -1,0 +1,34 @@
+# vi: ft=conf
+# This file is managed by Ansible. Do not change.
+
+[sssd]
+services = nss, pam
+config_file_version = 2
+domains = default
+
+[nss]
+override_shell = /bin/bash
+
+[pam]
+offline_credentials_expiration = 60
+
+[domain/default]
+id_provider = ldap
+auth_provider = ldap
+chpass_provider = ldap
+cache_credentials = True
+access_provider = simple
+
+ldap_id_use_start_tls = {{ sssd_ldap.start_tls }}
+ldap_tls_reqcert = demand
+
+ldap_search_base = {{ sssd_ldap.base_dn }}
+ldap_group_search_base = {{ sssd_ldap.group_dn }}
+ldap_user_search_base = {{ sssd_ldap.user_dn }}
+ldap_access_filter = {{ sssd_ldap.access_filter }}
+
+ldap_uri = {{ sssd_ldap.host }}
+ldap_default_bind_dn = {{ sssd_ldap.bind_dn }}
+ldap_default_authtok = {{ sssd_ldap.bind_pw }}
+ldap_search_timeout = 50
+ldap_network_timeout = 60

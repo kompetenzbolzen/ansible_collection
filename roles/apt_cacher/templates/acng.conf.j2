@@ -32,6 +32,8 @@ LogDir: /var/log/apt-cacher-ng
 SupportDir: /usr/lib/apt-cacher-ng
 Port: {{ apt_cacher.port }}
 
+PassThroughPattern: ^(.*):443$
+
 # Repository remapping. See manual for details.
 # In this example, some backends files might be generated during package
 # installation using information collected on the system.

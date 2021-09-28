@@ -1,0 +1,5 @@
+---
+apt_cacher:
+  port: 3142
+  dir: /var/cache/apt-cacher-ng
+

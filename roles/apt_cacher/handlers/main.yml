@@ -1,0 +1,6 @@
+---
+- name: restart
+  systemd:
+    name: apt-cacher-ng.service
+    state: restarted
+  become: yes

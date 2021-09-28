@@ -1,0 +1,20 @@
+---
+- name: Install package
+  apt:
+    name: apt-cacher-ng
+  become: yes
+
+- name: Ensure write access
+  file:
+    path: '{{ apt_cacher.dir }}'
+    owner: apt-cacher-ng
+    group: apt-cacher-ng
+    state: directory
+  become: yes
+
+- name: Install config
+  template:
+    src: acng.conf.j2
+    dest: /etc/apt-cacher-ng/acng.conf
+  become: yes
+  notify: restart

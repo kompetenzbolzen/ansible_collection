@@ -1,0 +1,81 @@
+#
+# IMPORTANT NOTE:
+#
+# THIS FILE IS MAYBE JUST ONE OF MANY CONFIGURATION FILES IN THIS DIRECTORY.
+# SETTINGS MADE IN OTHER FILES CAN OVERRIDE VALUES THAT YOU CHANGE HERE. GO
+# LOOK FOR OTHER CONFIGURATION FILES! CHECK THE MANUAL AND INSTALLATION NOTES
+# (like README.Debian) FOR MORE DETAILS!
+#
+
+# This is a configuration file for apt-cacher-ng, a smart caching proxy for
+# software package downloads. It's supposed to be in a directory specified by
+# the -c option of apt-cacher-ng, see apt-cacher-ng(8) for details.
+# RULES:
+# - letter case in variable names does not matter
+# - names and values are separated by colon or equals sign
+# - for boolean variables, zero means false, non-zero means true
+# - "default value" means built-in (!) defaults, i.e. something which the
+#   program uses if the option is not set here or in other config files.
+#   That value might be explicitly mentioned in the description. Where it is
+#   not, there is no reason to assume any of the examples to be the default
+#   value! In doubt, use acngtool to query the value of the particular variable.
+
+# Storage directory for downloaded data and related maintenance activity.
+#
+# Note: When the value for CacheDir is changed, change the file
+# /lib/systemd/system/apt-cacher-ng.service too
+#
+CacheDir: {{ apt_cacher.dir }}
+
+LogDir: /var/log/apt-cacher-ng
+
+SupportDir: /usr/lib/apt-cacher-ng
+Port: {{ apt_cacher.port }}
+
+# Repository remapping. See manual for details.
+# In this example, some backends files might be generated during package
+# installation using information collected on the system.
+# Examples:
+Remap-debrep: file:deb_mirror*.gz /debian ; file:backends_debian # Debian Archives
+Remap-uburep: file:ubuntu_mirrors /ubuntu ; file:backends_ubuntu # Ubuntu Archives
+Remap-klxrep: file:kali_mirrors /kali ; file:backends_kali # Kali Linux Archives
+Remap-cygwin: file:cygwin_mirrors /cygwin # ; file:backends_cygwin # incomplete, please create this file or specify preferred mirrors here
+Remap-sfnet:  file:sfnet_mirrors # ; file:backends_sfnet # incomplete, please create this file or specify preferred mirrors here
+Remap-alxrep: file:archlx_mirrors /archlinux # ; file:backend_archlx # Arch Linux
+Remap-fedora: file:fedora_mirrors # Fedora Linux
+Remap-epel:   file:epel_mirrors # Fedora EPEL
+Remap-slrep:  file:sl_mirrors # Scientific Linux
+Remap-gentoo: file:gentoo_mirrors.gz /gentoo ; file:backends_gentoo # Gentoo Archives
+Remap-secdeb: security.debian.org security.debian.org/debian-security deb.debian.org/debian-security /debian-security ; deb.debian.org/debian-security security.debian.org
+
+# Virtual page accessible in a web browser to see statistics and status
+# information, i.e. under http://localhost:3142/acng-report.html
+# NOTE: This option must be configured to run maintenance jobs (even when used
+# via acngtool in cron scripts). The AdminAuth option can be used to restrict
+# access to sensitive areas on that page.
+#
+# Default: not set, should be set by the system administrator
+ReportPage: acng-report.html
+
+
+# Days before considering an unreferenced file expired (to be deleted).
+# WARNING: if the value is set too low and particular index files are not
+# available for some days (mirror downtime) then there is a risk of removal of
+# still useful package files.
+#
+ExThreshold: 4
+
+
+# The version string reported to the peer, to be displayed as HTTP client (and
+# version) in the logs of the mirror.
+#
+# WARNING: Expect side effects! Some archives use this header to guess
+# capabilities of the client (i.e. allow redirection and/or https links) and
+# change their behaviour accordingly but ACNG might not support the expected
+# features.
+#
+# Default:
+#
+# UserAgent: Yet Another HTTP Client/1.2.3p4
+
+LocalDirs: acng-doc /usr/share/doc/apt-cacher-ng

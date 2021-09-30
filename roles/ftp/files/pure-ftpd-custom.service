@@ -1,0 +1,12 @@
+[Unit]
+Description=Pure FTPd
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+Restart=no
+ExecStart=/usr/sbin/pure-ftpd-ldap /etc/pure-ftpd/pure-ftpd.conf
+
+[Install]
+WantedBy=multi-user.target

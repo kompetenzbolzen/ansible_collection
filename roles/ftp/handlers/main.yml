@@ -1,0 +1,7 @@
+---
+- name: restart
+  systemd:
+    name: pure-ftpd-custom.service
+    enabled: yes
+    state: restarted
+  become: yes

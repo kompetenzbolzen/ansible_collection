@@ -1,0 +1,36 @@
+---
+- name: Install FTP
+  apt:
+    name:
+      - pure-ftpd-ldap
+  become: yes
+
+- name: Install Config
+  template:
+    src: pure-ftpd.conf.j2
+    dest: /etc/pure-ftpd/pure-ftpd.conf
+  become: yes
+  notify: restart
+
+- name: Install Config
+  template:
+    src: ldap.conf.j2
+    dest: /etc/pure-ftpd/db/ldap.conf
+    mode: '0600'
+  when: ftp.ldap.enable
+  become: yes
+  notify: restart
+
+- name: Remove original systemd unit
+  systemd:
+    name: pure-ftpd-ldap.service
+    state: stopped
+    enabled: no
+  become: yes
+
+- name: Install custom unit file
+  copy:
+    src: pure-ftpd-custom.service
+    dest: /etc/systemd/system/pure-ftpd-custom.service
+  become: yes
+  notify: restart

@@ -1,0 +1,48 @@
+# Managed by Ansible. Do NOT change.
+
+ChrootEveryone               yes
+BrokenClientsCompatibility   no
+MaxClientsNumber             50
+Daemonize                    no
+MaxClientsPerIP              8
+VerboseLog                   yes
+DisplayDotFiles              yes
+AnonymousOnly                no
+NoAnonymous                  yes
+#SyslogFacility               ftp
+DontResolve                  yes
+MaxIdleTime                  15
+
+{% if ftp.ldap.enable %}
+LDAPConfigFile               /etc/pure-ftpd/db/ldap.conf
+{% endif %}
+
+{% if ftp.enable_pam %}
+PAMAuthentication           yes
+{% endif %}
+
+{% if ftp.tls.enable %}
+TLS                          2
+TLSCipherSuite               HIGH
+CertFileAndKey               "{{ ftp.tls.cert }}" "{{ ftp.tls.key }}"
+{% endif %}
+
+LimitRecursion               10000 8
+AnonymousCanCreateDirs       no
+MaxLoad                      4
+AntiWarez                    yes
+
+# File creation mask. <umask for files>:<umask for dirs> .
+# 177:077 if you feel paranoid.
+Umask                        177:077
+
+MinUID                       100
+AllowUserFXP                 no
+AllowAnonymousFXP            no
+ProhibitDotFilesWrite        no
+ProhibitDotFilesRead         no
+AutoRename                   no
+AnonymousCantUpload          yes
+CreateHomeDir                yes
+MaxDiskUsage                 99
+CustomerProof                yes

@@ -1,0 +1,15 @@
+---
+ftp:
+  ldap:
+    enable: false
+    host: 'ldap.example.com'
+    port: 636
+    bind_dn: ''
+    bind_pw: ''
+    base: ''
+    filter: '(&(objectClass=posixAccount)(uid=\L))'
+  enable_pam: false
+  tls:
+    enable: false
+    cert: ''
+    key: ''

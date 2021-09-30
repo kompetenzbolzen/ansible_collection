@@ -1,0 +1,15 @@
+# Managed by Ansible. Do NOT change.
+
+LDAPScheme ldaps
+LDAPServer {{ ftp.ldap.host }}
+LDAPPort {{ ftp.ldap.port }}
+LDAPVersion 3
+
+LDAPBaseDN {{ ftp.ldap.base }}
+
+LDAPBindDN {{ ftp.ldap.bind_dn }}
+LDAPBindPW {{ ftp.ldap.bind_pw }}
+
+LDAPAuthMethod BIND
+
+LDAPFilter {{ ftp.ldap.filter }}

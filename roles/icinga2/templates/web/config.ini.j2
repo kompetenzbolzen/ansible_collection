@@ -1,0 +1,21 @@
+[global]
+show_stacktraces = "1"
+show_application_state_messages = "1"
+config_backend = "db"
+config_resource = "icingaweb_db"
+module_path = "/usr/share/icingaweb2/modules"
+
+[logging]
+log = "syslog"
+level = "ERROR"
+application = "icingaweb2"
+facility = "user"
+
+[security]
+protected_customvars = "*pw*,*password*,*key*,*snmp_community*"
+
+[themes]
+
+[authentication]
+
+

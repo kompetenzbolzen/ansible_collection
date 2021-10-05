@@ -1,0 +1,87 @@
+---
+- name: icingaweb Database
+  mysql_db:
+    name: icingaweb
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+  register: icingaweb_db
+
+- name: icingaweb Database schema
+  mysql_db:
+    name: icingaweb
+    state: import
+    target: '/usr/share/icingaweb2/etc/schema/mysql.schema.sql'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+  when: icingaweb_db.changed
+
+# password is 'admin'
+# create with php -r 'echo password_hash("admin", PASSWORD_DEFAULT);'
+- name: Create default admin user
+  community.mysql.mysql_query:
+    query: "INSERT INTO icingaweb.icingaweb_user (name, active, password_hash) VALUES ('admin', 1, '$2y$10$MN74jDR1LtgzEzxxxyqOgug1WWuuirfMWjOtHZdvi5yjsd4el75Y2')"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+  when: icingaweb_db.changed
+
+- name: icingaweb Database user
+  mysql_user:
+    name: icingaweb
+    host: localhost
+    state: present
+    priv: 'icingaweb.*:ALL'
+    password: '{{ icinga_web_db_pw }}'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+
+- name: Config dirs
+  file:
+    state: directory
+    path: '/etc/icingaweb2/{{ item }}'
+    owner: root
+    group: icingaweb2
+    mode: '2770'
+  become: yes
+  loop:
+    - ''
+    - modules
+    - modules/monitoring
+    - enabledModules
+
+- name: Install configuration files
+  template:
+    src: 'web/{{ item }}.j2'
+    dest: '/etc/icingaweb2/{{ item }}'
+    owner: www-data
+    group: icingaweb2
+    mode: '0660'
+  become: yes
+  loop:
+    - config.ini
+    - authentication.ini
+    - groups.ini
+    - resources.ini
+    - roles.ini
+    - modules/monitoring/config.ini
+    - modules/monitoring/commandtransports.ini
+    - modules/monitoring/backends.ini
+
+- name: Enable modules
+  file:
+    path: '/etc/icingaweb2/enabledModules/{{ item }}'
+    src: '/usr/share/icingaweb2/modules/{{ item }}'
+    state: link
+    owner: www-data
+    group: icingaweb2
+  become: yes
+  with_items: '{{ icingaweb.enabled_modules }}'
+
+- name: icingaweb2 user
+  user:
+    name: icingaweb2
+    group: icingaweb2
+    groups: www-data
+    append: yes
+  become: yes
+

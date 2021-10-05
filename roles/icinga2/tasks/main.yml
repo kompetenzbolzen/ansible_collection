@@ -1,0 +1,86 @@
+---
+- name: Install GnuPG
+  apt:
+    name: gnupg2
+  become: yes
+
+- name: Icinga APT Key
+  apt_key:
+    url: 'https://packages.icinga.com/icinga.key'
+    state: present
+  become: yes
+
+- name: Install Icinga APT Repository
+  template:
+    src: icinga.list.j2
+    dest: /etc/apt/sources.list.d/icinga.list
+  become: yes
+  register: install_repo
+
+- name: Update cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
+
+- name: Install Packages
+  apt:
+    name:
+      - icinga2
+      - icinga2-ido-mysql
+      - icingaweb2
+      - icingacli
+      - monitoring-plugins
+      - mariadb-server
+      - mariadb-client
+      - php
+      - php-intl
+      - php-imagick
+      - php-gd
+      - php-mysql
+      - php-curl
+      - php-mbstring
+      - apache2
+      - libapache2-mod-php
+      - python3-pymysql
+  become: yes
+
+- name: Securing MariaDB installation
+  community.mysql.mysql_query:
+    query:
+      - "DELETE FROM mysql.user WHERE User=''"
+      - "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+      - "DROP DATABASE IF EXISTS test"
+      - "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'"
+      - "FLUSH PRIVILEGES"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+
+- name: Generate Icingaweb2 API Password
+  shell:
+    cmd: 'dd if=/dev/urandom bs=16 count=1 status=none | base64'
+    creates: /etc/icinga2/api_pw.ansible
+  become: yes
+  register: gen_api_key
+
+- name: Save API Password
+  copy:
+    content: '{{ gen_api_key.stdout }}'
+    dest: /etc/icinga2/api_pw.ansible
+    owner: root
+    group: root
+    mode: '600'
+  become: yes
+  when: gen_api_key.changed
+
+- name: Read API Password
+  slurp:
+    src: /etc/icinga2/api_pw.ansible
+  become: yes
+  register: icingaweb_api_password
+
+- name: Configure Icinga2
+  include_tasks: icinga.yml
+
+- name: Configure Icingaweb2
+  include_tasks: icingaweb.yml

@@ -1,0 +1,13 @@
+/**
+* vi: ft=icinga2
+* This File is managed by Ansible. Do NOT change.
+*/
+
+library "db_ido_mysql"
+
+object IdoMysqlConnection "ido-mysql" {
+  user = "icinga",
+  password = "{{ icinga_ido_db_pw }}",
+  host = "localhost",
+  database = "ido"
+}

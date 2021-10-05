@@ -1,0 +1,32 @@
+[icingaweb_db]
+type = "db"
+db = "mysql"
+host = "localhost"
+port = ""
+dbname = "icingaweb"
+username = "icingaweb"
+password = "{{ icinga_web_db_pw }}"
+charset = ""
+use_ssl = "0"
+
+[icinga_ido]
+type = "db"
+db = "mysql"
+host = "localhost"
+port = ""
+dbname = "ido"
+username = "icinga"
+password = "{{ icinga_ido_db_pw }}"
+charset = ""
+use_ssl = "0"
+
+{% if icingaweb.ldap.use_ldap  %}
+[ldap_server]
+type	= ldap
+hostname= {{ icingaweb.ldap.host }}
+port	= {{ icingaweb.ldap.port }}
+encryption = {{ icingaweb.ldap.encryption }}
+root_dn	= "{{ icingaweb.ldap.root_dn }}"
+bind_dn	= "{{ icingaweb.ldap.bind_dn }}"
+bind_pw = "{{ icingaweb.ldap.bind_pw }}"
+{% endif  %}

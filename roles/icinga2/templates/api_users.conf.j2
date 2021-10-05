@@ -1,0 +1,17 @@
+/**
+* vi: ft=icinga2
+* This File is managed by Ansible. Do NOT change.
+*/
+
+object ApiUser "icingaweb2" {
+  password = "{{ icingaweb_api_password.content | b64decode }}"
+  permissions = [ "status/query", "actions/*", "objects/modify/*", "objects/query/*" ]
+}
+
+{% for user in icinga.api_users %}
+
+object ApiUser "{{ user.name }}" {
+  password = "{{ user.password }}"
+  permissions = {{ user.permissions }}
+}
+{% endfor %}

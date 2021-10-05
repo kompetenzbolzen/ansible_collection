@@ -1,0 +1,58 @@
+---
+- name: Install icinga2.conf
+  template:
+    src: icinga2.conf.j2
+    dest: /etc/icinga2/icinga2.conf
+    owner: nagios
+    group: nagios
+  become: yes
+  notify: Restart icinga
+
+- name: IDO Database
+  mysql_db:
+    name: ido
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+  register: ido_db
+
+- name: IDO Database schema import
+  mysql_db:
+    name: ido
+    target: '/usr/share/icinga2-ido-mysql/schema/mysql.sql'
+    state: import
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+  when: ido_db.changed
+
+- name: IDO Database user
+  mysql_user:
+    name: icinga
+    host: 'localhost'
+    state: present
+    priv: 'ido.*:ALL'
+    password: '{{ icinga_ido_db_pw }}'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+
+- name: Install extra config files
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/icinga2/{{ item }}'
+    owner: nagios
+    group: nagios
+  become: yes
+  notify: Restart icinga
+  loop:
+    - ido-mysql.conf
+    - api_users.conf
+
+- name: Enable features
+  file:
+    state: link
+    path: '/etc/icinga2/features-available/api.con'
+    src: '../features-available/api.conf'
+    owner: nagios
+    group: nagios
+  become: yes
+  notify: Restart icinga

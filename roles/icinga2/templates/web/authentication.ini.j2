@@ -1,0 +1,12 @@
+[icingaweb2]
+backend = "db"
+resource = "icingaweb_db"
+
+{% if icingaweb.ldap.use_ldap  %}
+[auth_ldap]
+backend			= ldap
+resource		= ldap_server
+user_class		= {{ icingaweb.ldap.user_class }}
+user_name_attribute	= {{ icingaweb.ldap.user_name_attribute }}
+filter			= "{{ icingaweb.ldap.filter }}"
+{% endif %}

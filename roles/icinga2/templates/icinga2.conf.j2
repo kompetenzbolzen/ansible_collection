@@ -1,0 +1,22 @@
+/**
+* vi: ft=icinga2
+* This File is managed by Ansible. Do NOT change.
+*/
+
+include "constants.conf"
+include "zones.conf"
+
+include <itl>
+include <plugins>
+include <plugins-contrib>
+include <manubulon>
+
+include <windows-plugins>
+
+include <nscp>
+
+include "features-enabled/*.conf"
+include "ido-mysql.conf"
+include "api_users.conf"
+
+include_recursive "conf.d"

@@ -1,0 +1,17 @@
+[icingaweb2]
+backend = "db"
+resource = "icingaweb_db"
+
+{% if icingaweb.ldap.use_ldap  %}
+[groups_ldap]
+backend			= ldap
+resource		= ldap_server
+base_dn			= {{ icingaweb.ldap.groups.base_dn }}
+group_member_attribute	= {{ icingaweb.ldap.groups.group_member_attribute }}
+group_name_attribute	= {{ icingaweb.ldap.groups.group_name_attribute }}
+group_class		= {{ icingaweb.ldap.groups.group_class }}
+group_filter		= {{ icingaweb.ldap.groups.group_filter }}
+user_base_dn		= {{ icingaweb.ldap.groups.user_base_dn }}
+user_class		= {{ icingaweb.ldap.groups.user_class }}
+user_name_attribute	= {{ icingaweb.ldap.groups.uid }}
+{% endif %}

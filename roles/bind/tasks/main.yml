@@ -1,0 +1,33 @@
+---
+- name: Install BIND9
+  ansible.builtin.apt:
+    name:
+      - bind9
+      - bind9utils
+      - bind9-doc
+  become: yes
+
+- name: Copy configuration
+  copy:
+    src: named.conf.options
+    dest: /etc/bind/named.conf.options
+  become: yes
+  notify: Restart bind
+
+- name: Install zone config
+  template:
+    src: named.conf.local.j2
+    dest: /etc/bind/named.conf.local
+  become: yes
+  notify: Restart bind
+
+- name: Create folder
+  file:
+    state: directory
+    path: /etc/bind/zonefiles
+  become: yes
+
+- name: Download and install Zonefiles
+  include_tasks: download_zonefile.yml
+  when: bind_install_zonefiles
+  loop: '{{ bind_zones }}'

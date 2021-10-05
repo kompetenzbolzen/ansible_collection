@@ -1,0 +1,6 @@
+---
+- name: Restart bind
+  systemd:
+    name: bind9.service
+    state: restarted
+  become: yes

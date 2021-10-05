@@ -1,0 +1,10 @@
+// vi: ft=named
+// This file is managed by Ansible. Do not change.
+
+{% for zone in bind_zones %}
+zone "{{ zone }}" {
+	type master;
+	file "/etc/bind/zonefiles/{{ zone }}";
+};
+
+{% endfor %}

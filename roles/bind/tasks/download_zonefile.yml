@@ -1,0 +1,15 @@
+---
+- name: Download zonefile
+  uri:
+    url: '{{ bind_zonefile_base_url }}/{{ item }}'
+    return_content: yes
+  delegate_to: localhost
+  register: zonefile
+
+- name: Install zonefile
+  copy:
+    dest: '/etc/bind/zonefiles/{{ item }}'
+    content: '{{ zonefile.content }}'
+  become: yes
+  notify: Restart bind
+

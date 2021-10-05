@@ -10,11 +10,17 @@
     dest: /etc/apt/sources.list.d/sury.list
     content: 'deb https://packages.sury.org/php/ {{ ansible_facts.distribution_release }} main'
   become: yes
+  register: install_repo
+
+- name: Update APT Cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
 
 - name: Install general packages
   apt:
     name: '{{ ["apache2", "libapache2-mpm-itk"] + php_versions }}'
-    update_cache: yes
   become: yes
 
 - name: Install extensions

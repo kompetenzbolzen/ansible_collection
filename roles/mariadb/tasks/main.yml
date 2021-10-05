@@ -5,7 +5,6 @@
       - mariadb-client
       - mariadb-server
       - python3-pymysql
-    update_cache: yes
   become: yes
 
 - name: Config File

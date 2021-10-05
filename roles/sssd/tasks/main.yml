@@ -5,7 +5,6 @@
       - sssd
       - libpam-sss
       - libnss-sss
-    update_cache: yes
   become: yes
 
 - name: Install SSSD Config file

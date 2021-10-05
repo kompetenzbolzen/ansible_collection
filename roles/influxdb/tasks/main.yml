@@ -17,10 +17,16 @@
     src: influxdb.list.j2
     dest: /etc/apt/sources.list.d/influxdb.list
   become: yes
+  register: install_repo
+
+- name: Update APT Cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
 
 - name: Install Packages
   apt:
-    update_cache: yes
     name:
       - curl
       - python3-influxdb

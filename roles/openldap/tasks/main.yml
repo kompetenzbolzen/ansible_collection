@@ -29,6 +29,7 @@
     state: exact
   become: yes
   when: ldap.tls.enable
+  ignore_errors: yes
 
 - name: Enable ldaps:636
   lineinfile:

@@ -98,7 +98,7 @@
           by users read
           by group/groupOfNames/member=cn=ldap_admin,ou=groups,{{ ldap.base }} manage
     olcRootDN: '{{ ldap.root_dn }}'
-      olcRootPW: '{{ ldap.root_pw_hash }}'
+    olcRootPW: '{{ ldap.root_pw_hash }}'
     state: exact
   become: yes
 

@@ -1,0 +1,13 @@
+---
+ldap:
+  o: 'Example Com'
+  base: 'dc=example,dc=com'
+  root_dn: 'cn=admin,dc=example,dc=com'
+  root_pw: 'admin'
+  root_pw_hash: '{SSHA}T4NWs0yED2vORnKH4fWMSicNH0n0jtwP'
+  tls:
+    enable: false
+    ca: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+    key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+    cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+

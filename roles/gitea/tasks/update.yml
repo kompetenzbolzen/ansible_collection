@@ -1,0 +1,23 @@
+---
+
+# initial ?
+
+- name: Stop gitea
+  systemd:
+    name: gitea
+    state: stopped
+  become: yes
+  when: not gitea_bin_stat.failed
+  ignore_errors: yes
+
+- name: Download Gitea
+  get_url:
+    url: 'https://dl.gitea.io/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64'
+    checksum: 'sha256:{{ gitea.version.sha }}'
+    dest: /usr/local/bin/gitea
+    owner: root
+    group: root
+    mode: '755'
+  become: yes
+  notify:
+    - Handle systemd

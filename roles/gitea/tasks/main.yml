@@ -1,0 +1,103 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - git
+  become: yes
+
+- name: Create User
+  user:
+    name: git
+    home: /home/git
+    shell: /bin/bash
+    system: yes
+    state: present
+  become: yes
+
+- name: Folder structure
+  file:
+    path: '{{ item }}'
+    owner: git
+    group: git
+    mode: '750'
+    state: directory
+  become: yes
+  loop:
+    - /var/lib/gitea/
+    - /var/lib/gitea/custom
+    - /var/lib/gitea/data
+    - /var/lib/gitea/log
+
+- name: Config folder
+  file:
+    path: /etc/gitea
+    owner: root
+    group: git
+    mode: '750'
+    state: directory
+  become: yes
+
+- name: Check for update
+  stat:
+    path: /usr/local/bin/gitea
+    checksum_algorithm: sha256
+  register: gitea_bin_stat
+  ignore_errors: yes
+
+- name: perform update
+  include: update.yml
+  when:
+    - (not gitea_bin_stat.stat.exists) or (gitea_bin_stat.stat.checksum != gitea.version.sha)
+
+- name: Check if initial setup is needed
+  include_tasks: secrets.yml
+
+- name: Read secret Key
+  slurp:
+    src: /etc/gitea/secret_key
+  become: yes
+  register: sec_key
+
+- name: Read secret Key
+  slurp:
+    src: /etc/gitea/internal_token
+  become: yes
+  register: int_tok
+
+- name: Install gitea config file
+  template:
+    src: app.ini.j2
+    dest: /etc/gitea/app.ini
+    owner: root
+    group: git
+    mode: '640'
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Check for changed cert
+  command: /bin/true
+  when:
+    - cert_changed
+  notify:
+    - Handle systemd
+
+- name: Install gitea unit file
+  copy:
+    src: gitea.service
+    dest: /etc/systemd/system/gitea.service
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Wait 10s for gitea to start
+  wait_for:
+    timeout: 10
+  delegate_to: localhost
+# This only install base configuration. Group settings have to be set manually in gitea...
+- name: Install LDAP
+  include_tasks: ldap.yml
+  when: gitea.ldap.enable

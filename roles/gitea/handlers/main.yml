@@ -1,0 +1,7 @@
+---
+- name: Handle systemd
+  systemd:
+    name: gitea
+    enabled: yes
+    state: restarted
+  become: yes

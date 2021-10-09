@@ -1,0 +1,28 @@
+---
+- name: Check if LDAP is installed
+  command: gitea --config /etc/gitea/app.ini --work-path /var/lib/gitea admin auth list
+  become_user: git
+  become: yes
+  register: check_ldap
+
+- name: Configure LDAP Login provider
+  command:
+    cmd: >-
+      gitea --config /etc/gitea/app.ini --work-path /var/lib/gitea admin auth add-ldap
+      --name ldap-prod
+      --security-protocol "{{ gitea.ldap.security }}"
+      --host "{{ gitea.ldap.host }}"
+      --port "{{ gitea.ldap.port }}"
+      --bind-dn "{{ gitea.ldap.base_dn }}"
+      --bind-password "{{ gitea.ldap.bind_pw }}"
+      --user-search-base "{{ gitea.ldap.user_search_base }}"
+      --user-filter "{{ gitea.ldap.user_filter }}"
+      --admin-filter "{{ gitea.ldap.admin_filter }}"
+      --username-attribute "{{ gitea.ldap.username_attribute }}"
+      --firstname-attribute "{{ gitea.ldap.firstname_attribute }}"
+      --surname-attribute "{{ gitea.ldap.surname_attribute }}"
+      --email-attribute "{{ gitea.ldap.email_attribute }}"
+      --synchronize-users
+  become_user: git
+  become: yes
+  when: not check_ldap.stdout | regex_search("ldap-prod")

@@ -1,5 +1,6 @@
 ---
 ftp:
+  chroot: no
   ldap:
     enable: false
     host: 'ldap.example.com'

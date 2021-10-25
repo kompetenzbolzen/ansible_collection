@@ -13,7 +13,7 @@
       --security-protocol "{{ gitea.ldap.security }}"
       --host "{{ gitea.ldap.host }}"
       --port "{{ gitea.ldap.port }}"
-      --bind-dn "{{ gitea.ldap.base_dn }}"
+      --bind-dn "{{ gitea.ldap.bind_dn }}"
       --bind-password "{{ gitea.ldap.bind_pw }}"
       --user-search-base "{{ gitea.ldap.user_search_base }}"
       --user-filter "{{ gitea.ldap.user_filter }}"

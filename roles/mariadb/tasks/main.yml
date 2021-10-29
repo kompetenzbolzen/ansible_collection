@@ -8,23 +8,12 @@
   become: yes
 
 - name: Config File
-  copy:
-    src: 50-server.cnf
+  template:
+    src: 50-server.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/50-server.cnf
   become: yes
   notify:
     - Restart MariaDB
-
-- name: Generate SSL Certificates
-  include_role:
-    name: signed_certificate
-  vars:
-    cert_name: mysql
-    ca_path: /etc/mysql
-    key_path: /etc/mysql
-    cert_path: /etc/mysql
-    owner: mysql
-    group: mysql
 
 - name: Check for changed cert
   command: /bin/true

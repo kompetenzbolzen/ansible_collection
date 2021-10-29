@@ -2,6 +2,14 @@
 
 ```
 ---
+mdb:
+  address: '0.0.0.0'
+  ssl:
+    enable: False
+    ca: '/etc/ssl/certs/ca-certificates.crt'
+    cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+    key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+
 dbs:
   - testdb1
   - testdb2

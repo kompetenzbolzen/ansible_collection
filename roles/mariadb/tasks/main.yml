@@ -18,7 +18,7 @@
 - name: Check for changed cert
   command: /bin/true
   when:
-    - cert_changed
+    - '{{ cert_changed | default(False) }}'
   notify:
     - Restart MariaDB
 

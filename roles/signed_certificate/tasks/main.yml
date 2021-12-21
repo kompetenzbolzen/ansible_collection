@@ -1,9 +1,9 @@
 ---
-- name: Unset cert_changed flag
+- name: Unset cert_changed Flag
   set_fact:
     cert_changed: False
 
-- name: Instaall crypt libs
+- name: Install crypt libs
   apt:
     name:
       - python3-cryptography
@@ -25,7 +25,7 @@
   become: yes
   when: key_check.failed
 
-- name: Check file permissions for Key
+- name: Check File Permissions for Key
   file:
     path: '{{ key_path }}/{{ cert_name }}.key'
     state: file
@@ -35,7 +35,7 @@
   become: yes
   when: not key_check.failed
 
-- name: Read existing Certificate
+- name: Read Existing Certificate
   community.crypto.x509_certificate_info:
     path: '{{ cert_path }}/{{ cert_name }}.pem'
     valid_at:
@@ -44,7 +44,7 @@
   become: yes
   register: existing_cert
 
-- name: Check certificate
+- name: Check Certificate
   assert:
     that:
       - existing_cert.valid_at.point_1
@@ -56,6 +56,6 @@
   ignore_errors: yes
   register: cert_assert
 
-- name: Trigger Cert generation
+- name: Trigger Cert Generation
   include: sign.yml
   when: cert_assert.failed

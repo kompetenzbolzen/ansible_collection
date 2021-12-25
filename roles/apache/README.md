@@ -3,6 +3,8 @@
 
 Example config
 
+PHP-Modules and apache mods in example config are always needed.
+
 ```
 ---
 php_versions:
@@ -15,6 +17,7 @@ php_extensions:
 apache_mods:
   - ssl
   - rewrite
+  - proxy_fcgi
 
 apache_rproxies:
   proxy-sso:

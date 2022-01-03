@@ -26,4 +26,14 @@ gitea:
     user: ''
     passwd: ''
     ssl: 'true'
+  mail:
+    enable: false
+    smtp_host: ''
+    tls: false
+    skip_verify: false
+    from: ''
+    user: ''
+    pass: ''
+    plain_text: false
+    subject_prefix: ''
 

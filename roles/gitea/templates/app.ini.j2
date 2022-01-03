@@ -721,46 +721,19 @@ PROXY_URL =
 PROXY_HOSTS =
 
 [mailer]
-ENABLED = false
-; Buffer length of channel, keep it as it is if you don't know what it is.
+ENABLED = {{ gitea.mail.enable }}
 SEND_BUFFER_LEN = 100
-; Prefix displayed before subject in mail
-SUBJECT_PREFIX =
-; Mail server
-; Gmail: smtp.gmail.com:587
-; QQ: smtp.qq.com:465
-; Using STARTTLS on port 587 is recommended per RFC 6409.
-; Note, if the port ends with "465", SMTPS will be used.
-HOST =
-; Disable HELO operation when hostnames are different.
-DISABLE_HELO =
-; Custom hostname for HELO operation, if no value is provided, one is retrieved from system.
-HELO_HOSTNAME =
-; Whether or not to skip verification of certificates; `true` to disable verification. This option is unsafe. Consider adding the certificate to the system trust store instead.
-SKIP_VERIFY = false
-; Use client certificate
-USE_CERTIFICATE = false
-CERT_FILE = custom/mailer/cert.pem
-KEY_FILE = custom/mailer/key.pem
-; Should SMTP connect with TLS, (if port ends with 465 TLS will always be used.)
-; If this is false but STARTTLS is supported the connection will be upgraded to TLS opportunistically.
-IS_TLS_ENABLED = false
-; Mail from address, RFC 5322. This can be just an email address, or the `"Name" <email@example.com>` format
-FROM =
-; Mailer user name and password
-; Please Note: Authentication is only supported when the SMTP server communication is encrypted with TLS (this can be via STARTTLS) or `HOST=localhost`.
-USER =
-; Use PASSWD = `your password` for quoting if you use special characters in the password.
-PASSWD =
-; Send mails as plain text
-SEND_AS_PLAIN_TEXT = false
-; Set Mailer Type (either SMTP, sendmail or dummy to just send to the log)
+SUBJECT_PREFIX = {{ gitea.mail.subject_prefix }}
+HOST = {{ gitea.mail.smtp_host }}
+SKIP_VERIFY = {{ gitea.mail.skip_verify }}
+IS_TLS_ENABLED = {{ gitea.mail.tls }}
+FROM = {{ gitea.mail.from }}
+USER = {{ gitea.mail.user }}
+PASSWD = {{ gitea.mail.pass }}
+SEND_AS_PLAIN_TEXT = {{ gitea.mail.plain_text }}
 MAILER_TYPE = smtp
-; Specify an alternative sendmail binary
 SENDMAIL_PATH = sendmail
-; Specify any extra sendmail arguments
 SENDMAIL_ARGS =
-; Timeout for Sendmail
 SENDMAIL_TIMEOUT = 5m
 
 [cache]

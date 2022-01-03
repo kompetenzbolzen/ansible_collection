@@ -1,0 +1,13 @@
+---
+- name: Restart pgsql systemd
+  systemd:
+    name: postgresql
+    state: restarted
+  become: yes
+  listen: restart pgsql
+
+- name: Wait 10s for postgres
+  wait_for:
+    timeout: 10
+  delegate_to: localhost
+  listen: restart pgsql

@@ -1,0 +1,88 @@
+---
+- name: Check for BORG
+  command: which borg
+  register: borg_check
+  ignore_errors: yes
+
+# Kinda hacky but saves time
+- name: Install BORG
+  apt:
+    name:
+      - borgbackup
+  become: yes
+  when: not borg_check.rc == 0
+
+- name: Create BORG repo
+  file:
+    path: '{{ borg_repo_dir }}'
+    state: directory
+    owner: server
+    group: server
+    mode: 'u=rwx,g=,o='
+      #    recurse: yes
+  become: yes
+
+- name: Initialize BORG repo
+  command:
+    cmd: borg init --encryption=repokey
+    creates: '{{ borg_repo_dir }}/config'
+  environment:
+    BORG_REPO: '{{ borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ vault_db_backup_key[ env ] }}'
+
+- name: Create tempdir
+  file:
+    path: /tmp/postgres
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: 'u=rwx,g=,o='
+  become: yes
+
+- name: Dump databases
+  community.postgresql.postgresql_db:
+    name: '{{ item }}'
+    state: dump
+    target: '/tmp/postgres/{{ item }}.sql'
+    login_unix_socket: '/var/run/postgresql/'
+  loop: '{{ pg_dbs }}'
+  become_user: postgres
+  become: yes
+
+- name: Create tempdir
+  file:
+    path: /tmp/postgres
+    state: directory
+    owner: server
+    group: server
+    recurse: yes
+    mode: 'u=rwx,g=,o='
+  become: yes
+
+- name: Create BORG backup
+  command: 'borg create --compression lz4 --verbose ::{hostname}-{now} /tmp/postgres'
+  environment:
+    BORG_REPO: '{{ borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ vault_db_backup_key[ env ] }}'
+  register: borg_output
+
+- name: Borg Output
+  debug:
+    var: borg_output.stderr
+
+- name: Delete TEMP files
+  file:
+    path: /tmp/postgres
+    state: absent
+  become: yes
+
+- name: Prune BORG backup
+  command: 'borg prune --list --keep-last 3 --keep-daily 7 --keep-weekly 4 --keep-monthly 6'
+  environment:
+    BORG_REPO: '{{ borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ vault_pg_db_backup_key[ env ] }}'
+  register: borg_prune
+
+- name: Prune Output
+  debug:
+    var: borg_prune.stderr

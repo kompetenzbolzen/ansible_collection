@@ -1,0 +1,78 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - postgresql-client
+      - python3-psycopg2
+    update_cache: yes
+  become: yes
+
+- name: Server configuration
+  template:
+    src: pgsql.conf.j2
+    dest: '/etc/postgresql/{{ pg_ver }}/{{ pg_ins }}/conf.d/deployment.conf'
+  become: yes
+  notify:
+    - restart pgsql
+
+- name: Server configuration
+  template:
+    src: pg_hba.conf.j2
+    dest: '/etc/postgresql/{{ pg_ver }}/{{ pg_ins }}/pg_hba.conf'
+  become: yes
+  notify:
+    - restart pgsql
+
+- name: Generate SSL Certificates
+  include_role:
+    name: signed_certificate
+  vars:
+    owner: postgres
+
+- name: Check for changed cert
+  command: /bin/true
+  when:
+    - cert_changed
+  notify:
+    - restart pgsql
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Database configuration
+  community.postgresql.postgresql_db:
+    name: '{{ item }}'
+    state: present
+    encoding: UTF-8
+    template: template0
+    login_unix_socket: '/var/run/postgresql/'
+  loop: '{{ pg_dbs }}'
+  become_user: postgres
+  become: yes
+
+- name: User configuration
+  community.postgresql.postgresql_user:
+    name: '{{ item.key }}'
+    password: '{{ vault_pg_db_users_pw[ ansible_facts.fqdn ][ item.key ] }}'
+    login_unix_socket: '/var/run/postgresql/'
+  args: '{{ item.value }}'
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+  with_dict: '{{ pg_db_users }}'
+  become_user: postgres
+  become: yes
+
+- name: Privilege configuration
+  community.postgresql.postgresql_privs:
+    db: postgres
+    roles: PUBLIC
+    privs: ALL
+    type: database
+    objs: 'postgres,{{ pg_dbs | join(",") }}'
+    state: absent
+    login_unix_socket: '/var/run/postgresql/'
+  become_user: postgres
+  become: yes
+

@@ -1,0 +1,81 @@
+---
+- name: Check for BORG
+  command: which borg
+  register: borg_check
+  ignore_errors: yes
+
+# Kinda hacky but saves time
+- name: Install BORG
+  apt:
+    name:
+      - borgbackup
+  become: yes
+  when: not borg_check.rc == 0
+
+- name: Create BORG repo
+  file:
+    path: '{{ sql_backup.borg_repo_dir }}'
+    state: directory
+    mode: 'u=rwx,g=,o='
+  become: yes
+
+- name: Initialize BORG repo
+  command:
+    cmd: borg init --encryption=repokey
+    creates: '{{ sql_backup.borg_repo_dir }}/config'
+  environment:
+    BORG_REPO: '{{ sql_backup.borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ sql_backup.borg_repo_key }}'
+  become: yes
+
+- name: Create tempdir
+  file:
+    path: /tmp/sql
+    state: directory
+    owner: server
+    group: server
+    mode: 'u=rwx,g=,o='
+  become: yes
+
+- name: Dump databases
+  community.mysql.mysql_db:
+    state: dump
+    name: '{{ item }}'
+    target: '/tmp/sql/{{ item }}.sql'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop: '{{ dbs }}'
+  become: yes
+
+- name: Create BORG backup
+  command: 'borg create --compression lz4 --verbose ::{hostname}-{now} /tmp/sql'
+  environment:
+    BORG_REPO: '{{ sql_backup.borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ sql_backup.borg_repo_key }}'
+  register: borg_output
+  become: yes
+
+- name: Borg Output
+  debug:
+    var: borg_output.stderr
+
+- name: Delete TEMP files
+  file:
+    path: /tmp/sql
+    state: absent
+  become: yes
+
+- name: Prune BORG backup
+  command: 'borg prune --list
+    --keep-last {{ sql_backup.keep_last }}
+    --keep-daily {{ sql_backup.keep_daily }}
+    --keep-weekly {{ sql_backup.keep_weekly }}
+    --keep-monthly {{ sql_backup.keep_monthly }}'
+  environment:
+    BORG_REPO: '{{ sql_backup.borg_repo_dir }}'
+    BORG_PASSPHRASE: '{{ sql_backup.borg_repo_key }}'
+  register: borg_prune
+  become: yes
+
+- name: Prune Output
+  debug:
+    var: borg_prune.stderr

@@ -1,0 +1,9 @@
+# vi: ft=conf
+
+password_encryption = scram-sha-256
+
+listen_addresses = '*'
+
+ssl = on
+ssl_cert_file = '/etc/ssl/certs/{{ ansible_facts.fqdn }}.pem'
+ssl_key_file = '/etc/ssl/private/{{ ansible_facts.fqdn }}.key'

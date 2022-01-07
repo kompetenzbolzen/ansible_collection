@@ -631,13 +631,15 @@ EMAIL_DOMAIN_WHITELIST =
 ; Comma-separated list of domain names that are not allowed to be used to register on a Gitea instance
 EMAIL_DOMAIN_BLOCKLIST =
 ; Disallow registration, only allow admins to create accounts.
+
+
 DISABLE_REGISTRATION = true
 ; Allow registration only using third-party services, it works only when DISABLE_REGISTRATION is false
 ALLOW_ONLY_EXTERNAL_REGISTRATION = false
-; User must sign in to view anything.
+
 REQUIRE_SIGNIN_VIEW = true
-; Mail notification
-ENABLE_NOTIFY_MAIL = false
+ENABLE_NOTIFY_MAIL = {{ gitea.mail.enable }}
+
 ; This setting enables gitea to be signed in with HTTP BASIC Authentication using the user's password
 ; If you set this to false you will not be able to access the tokens endpoints on the API with your password
 ; Please note that setting this to false will not disable OAuth Basic or Basic authentication using a token

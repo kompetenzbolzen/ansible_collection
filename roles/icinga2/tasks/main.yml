@@ -45,6 +45,8 @@
       - python3-pymysql
       - git
       - mailutils
+      - libsasl2-modules
+      - sasl2-bin
   become: yes
 
 - name: Securing MariaDB installation
@@ -80,6 +82,25 @@
     src: /etc/icinga2/api_pw.ansible
   become: yes
   register: icingaweb_api_password
+
+- name: generate SSH folder
+  file:
+    state: directory
+    path: /var/lib/nagios/.ssh
+  become: yes
+  become_user: nagios
+
+- name: generate SSH-Key
+  community.crypto.openssh_keypair:
+    comment: 'monitor'
+    path: /var/lib/nagios/.ssh/id_rsa
+  become: yes
+  become_user: nagios
+  register: ssh_key
+
+- name: Print SSH-PubKey
+  debug:
+    var: ssh_key.public_key
 
 - name: Configure Icinga2
   include_tasks: icinga.yml

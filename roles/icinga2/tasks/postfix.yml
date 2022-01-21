@@ -26,7 +26,6 @@
   become: yes
   when: bysender.changed
 
-# sudo apt install libsasl2-modules sasl2-bin
 - name: postfix config
   lineinfile:
     path: /etc/postfix/main.cf
@@ -46,4 +45,3 @@
     - reg: '^smtp_sasl_security_options\w*=.*$'
       line: 'smtp_sasl_security_options = noanonymous'
   notify: Restart postfix
-  become: yes

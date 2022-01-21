@@ -44,4 +44,5 @@
       line: 'smtp_use_tls = yes'
     - reg: '^smtp_sasl_security_options\w*=.*$'
       line: 'smtp_sasl_security_options = noanonymous'
+  become: yes
   notify: Restart postfix

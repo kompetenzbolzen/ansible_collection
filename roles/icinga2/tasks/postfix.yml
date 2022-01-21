@@ -1,0 +1,49 @@
+---
+- name: Install postfix relay creds
+  copy:
+    content: '{{ icinga.mail.smtp_host }} {{ icinga.mail.smtp_user }}:{{ icinga.mail.smtp_psw }}'
+    dest: /etc/postfix/relay-credentials
+    mode: '0600'
+  become: yes
+  register: relay_creds
+  notify: Restart postfix
+
+- name: Create hash db
+  shell: postmap /etc/postfix/relay-credentials
+  become: yes
+  when: relay_creds.changed
+
+- name: Install postfix relay creds
+  copy:
+    content: '{{ icinga.mail.from }} [{{ icinga.mail.smtp_host }}]:{{ icinga.mail.smtp_port }}'
+    dest: /etc/postfix/bysender
+  become: yes
+  register: bysender
+  notify: Restart postfix
+
+- name: Create hash db
+  shell: postmap /etc/postfix/bysender
+  become: yes
+  when: bysender.changed
+
+# sudo apt install libsasl2-modules sasl2-bin
+- name: postfix config
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '{{ item.reg }}'
+    line: '{{ item.line }}'
+  loop:
+    - reg: '^sender_dependent_relayhost_maps\w*=.*$'
+      line: 'sender_dependent_relayhost_maps = hash:/etc/postfix/bysender'
+    - reg: '^smtp_sasl_auth_enable\w*=.*$'
+      line: 'smtp_sasl_auth_enable = yes'
+    - reg: '^smtp_tls_security_level\w*=.*$'
+      line: 'smtp_tls_security_level = encrypt'
+    - reg: '^smtp_sasl_password_maps\w*=.*$'
+      line: 'smtp_sasl_password_maps = hash:/etc/postfix/relay-credentials'
+    - reg: '^smtp_use_tls\w*=.*$'
+      line: 'smtp_use_tls = yes'
+    - reg: '^smtp_sasl_security_options\w*=.*$'
+      line: 'smtp_sasl_security_options = noanonymous'
+  notify: Restart postfix
+  become: yes

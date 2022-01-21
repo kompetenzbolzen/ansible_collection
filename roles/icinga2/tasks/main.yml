@@ -43,6 +43,8 @@
       - apache2
       - libapache2-mod-php
       - python3-pymysql
+      - git
+      - mailutils
   become: yes
 
 - name: Securing MariaDB installation
@@ -84,3 +86,10 @@
 
 - name: Configure Icingaweb2
   include_tasks: icingaweb.yml
+
+- name: Configure apache2
+  include_tasks: apache.yml
+
+- name: Configure postfix
+  include_tasks: postfix.yml
+  when: icinga.mail.enable | default(false)

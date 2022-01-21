@@ -44,7 +44,8 @@ icingaweb:
     filter: ''
     groups:
       base_dn: ''
-      group_member_attribute: 'cn'
+      group_member_attribute: 'member'
+      group_name_attribute: 'cn'
       group_class: 'groupOfNames'
       group_filter: 'cn=*'
       user_base_dn: ''

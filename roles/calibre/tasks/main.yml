@@ -1,0 +1,56 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - calibre
+      - python3-pip
+      - libsasl2-dev
+      - libldap2-dev
+      - libssl-dev
+  become: true
+
+- name: Check library existence
+  stat:
+    path: /opt/calibre/library
+  register: library
+
+- name: Download first book
+  get_url:
+    url: https://github.com/progit/progit2/releases/download/2.1.336/progit.pdf
+    dest: /opt/calibre/progit.pdf
+  become: true
+  when: not library.stat.exists
+
+- name: Initialize calibre library
+  shell:
+    cmd: calibredb --library-path=library add progit.pdf
+    chdir: /opt/calibre
+    creates: library
+  become: true
+
+- name: Change ownership of calibre library
+  file:
+    path: /opt/calibre/library
+    recurse: true
+    owner: calibre
+    group: calibre
+  become: true
+
+- name: Remove first book file
+  file:
+    path: /opt/calibre/progit.pdf
+    state: absent
+  become: true
+  when: not library.stat.exists
+
+- name: Install calibre web with pip
+  pip:
+    name: calibreweb[{{ features | join(",") }}]
+  become: true
+
+- name: Create systemd unit
+  template:
+    dest: /etc/systemd/system/cps.service
+    src: cps.service.j2
+  become: true
+  notify: Restart cps

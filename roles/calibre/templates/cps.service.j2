@@ -1,0 +1,14 @@
+[Unit]
+Description=Calibre-Web
+
+[Service]
+Type=simple
+User=calibre
+{% if ssl == true %}
+ExecStart=/usr/local/bin/cps -c '/etc/ssl/certs/{{ ansible_facts.fqdn }}.pem' -k '/etc/ssl/private/{{ ansible_facts.fqdn }}.key'
+{% else %}
+ExecStart=/usr/local/bin/cps
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

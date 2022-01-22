@@ -47,10 +47,49 @@
     - ido-mysql.conf
     - api_users.conf
 
+- name: Install config from git
+  git:
+    dest: '/etc/icinga2/conf.git.d'
+    repo: '{{ icinga.config.git_url }}'
+    version: '{{ icinga.config.git_version }}'
+  become: yes
+  become_user: nagios
+  when: icinga.config.manage | default(false)
+  notify: Restart icinga
+
+- name: Create API certs folder
+  file:
+    state: directory
+    path: /var/lib/icinga2/certs
+    owner: nagios
+    group: nagios
+  become: yes
+
+- name: Install API TLS Key/Certificate
+  copy:
+    remote_src: yes
+    src: '{{ icinga.api_cert[item] }}'
+    dest: '/var/lib/icinga2/certs/{{ ansible_facts.fqdn }}.{{ item }}'
+    owner: nagios
+    group: nagios
+  become: yes
+  loop:
+    - key
+    - crt
+
+- name: Install API TLS CA
+  copy:
+    remote_src: yes
+    src: '{{ icinga.api_cert.ca }}'
+    dest: '/var/lib/icinga2/certs/ca.crt'
+    owner: nagios
+    group: nagios
+  become: yes
+
 - name: Enable features
   file:
     state: link
-    path: '/etc/icinga2/features-available/api.con'
+    path: '/etc/icinga2/features-enabled/api.conf'
     src: '../features-available/api.conf'
     owner: nagios
     group: nagios

@@ -5,3 +5,17 @@
     state: restarted
     enabled: yes
   become: yes
+
+- name: Restart apache
+  systemd:
+    name: apache2
+    state: restarted
+    enabled: yes
+  become: yes
+
+- name: Restart postfix
+  systemd:
+    name: postfix
+    state: restarted
+    enabled: yes
+  become: yes

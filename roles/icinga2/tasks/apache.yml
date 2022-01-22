@@ -1,0 +1,44 @@
+---
+- name: Install index.html
+  copy:
+    src: index.html
+    dest: /var/www/html/index.html
+  become: yes
+  notify: Restart apache
+
+- name: Install site-config
+  copy:
+    src: 000-default.conf
+    dest: /etc/apache2/sites-available/000-default.conf
+  become: yes
+  notify: Restart apache
+
+- name: Install SSL site-config
+  template:
+    src: default-ssl.conf.j2
+    dest: /etc/apache2/sites-available/default-ssl.conf
+  become: yes
+  notify: Restart apache
+
+- name: Enable sites
+  file:
+    state: link
+    path: '/etc/apache2/sites-enabled/{{ item }}'
+    src: '../sites-available/{{ item }}'
+  loop:
+    - 000-default.conf
+    - default-ssl.conf
+  become: yes
+  notify: Restart apache
+
+- name: Enable apache mods
+  file:
+    state: link
+    path: '/etc/apache2/mods-enabled/{{ item }}'
+    src: '../mods-available/{{ item }}'
+  loop:
+    - ssl.conf
+    - ssl.load
+    - socache_shmcb.load
+  become: yes
+  notify: Restart apache

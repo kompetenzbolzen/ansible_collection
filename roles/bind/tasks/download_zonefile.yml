@@ -5,6 +5,7 @@
     return_content: yes
   delegate_to: localhost
   register: zonefile
+  when: bind_zonefile_base_url != ""
 
 - name: Install zonefile
   copy:
@@ -12,4 +13,13 @@
     content: '{{ zonefile.content }}'
   become: yes
   notify: Restart bind
+  when: bind_zonefile_base_url != ""
+
+- name: Copy zonefile
+  copy:
+    src: '{{ bind_zonefile_base_folder }}/{{ item }}'
+    dest: '/etc/bind/zonefiles/{{ item }}'
+  become: yes
+  notify: Restart bind
+  when: bind_zonefile_base_folder != ""
 

@@ -67,6 +67,14 @@
     - modules/monitoring/commandtransports.ini
     - modules/monitoring/backends.ini
 
+- name: Install modules
+  git:
+    dest: '/usr/share/icingaweb2/modules/{{ item.key }}'
+    repo: '{{ item.value.url }}'
+    version: '{{ item.value.version }}'
+  become: yes
+  with_dict: '{{ icingaweb.install_modules }}'
+
 - name: Enable modules
   file:
     path: '/etc/icingaweb2/enabledModules/{{ item }}'
@@ -84,4 +92,3 @@
     groups: www-data
     append: yes
   become: yes
-

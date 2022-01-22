@@ -1,4 +1,5 @@
 ---
 bind_zones: []
 bind_zonefile_base_url: ''
+bind_zonefile_base_folder: ''
 bind_install_zonefiles: false

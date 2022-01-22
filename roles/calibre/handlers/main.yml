@@ -1,0 +1,7 @@
+---
+- name: Restart cps
+  systemd:
+    name: cps.service
+    state: restarted
+    enabled: true
+  become: true

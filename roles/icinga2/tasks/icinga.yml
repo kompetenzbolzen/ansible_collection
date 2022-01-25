@@ -46,6 +46,7 @@
   loop:
     - ido-mysql.conf
     - api_users.conf
+    - constants.conf
 
 - name: Install config from git
   git:

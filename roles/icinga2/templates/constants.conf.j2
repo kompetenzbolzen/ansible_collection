@@ -1,0 +1,10 @@
+/**
+* vi: ft=icinga2
+* This File is managed by Ansible. Do NOT change.
+*/
+
+{% for const in icinga.constants %}
+
+const {{ const }} = "{{ icinga.constants[ const ] }}"
+
+{% endfor %}

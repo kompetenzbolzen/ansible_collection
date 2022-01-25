@@ -17,7 +17,7 @@ icinga:
   config:
     manage: false
     git_url: ''
-    git_branch: 'mainu'
+    git_version: 'mainu'
   mail:
     enable: false
     smtp_host: 'smtp.example.com'
@@ -25,6 +25,13 @@ icinga:
     smtp_user: ''
     smtp_psw: ''
     from: ''
+  constants:
+    TicketSalt: ''
+    NodeName: '{{ ansible_facts.fqdn }}'
+    ZoneName: '{{ ansible_facts.fqdn }}'
+    PluginDir: '/usr/lib/nagios/plugins'
+    ManubulonPluginDir: '/usr/lib/nagios/plugins'
+    PluginContribDir: '/usr/lib/nagios/plugins'
 
 icingaweb:
   cert:
@@ -49,7 +56,7 @@ icingaweb:
       group_class: 'groupOfNames'
       group_filter: 'cn=*'
       user_base_dn: ''
-      user_class: 'posixAccount'
+      user_class: 'inetOrgPerson'
       user_name_attribute: 'uid'
   roles:
     - name: Administrators

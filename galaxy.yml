@@ -4,6 +4,7 @@ version: 0.9.1
 readme: README.md
 authors:
 - Jonas Gunz <himself@jonasgunz.de>
+- Konstantin Grabmann <grbmn@kstn.in>
 
 description: Collections of Ansible roles I use
 license_file: 'LICENSE'

@@ -57,6 +57,7 @@
   become_user: nagios
   when: icinga.config.manage | default(false)
   notify: Restart icinga
+  tags: config
 
 - name: Create API certs folder
   file:

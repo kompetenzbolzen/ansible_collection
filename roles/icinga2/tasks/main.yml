@@ -103,7 +103,10 @@
     var: ssh_key.public_key
 
 - name: Configure Icinga2
-  include_tasks: icinga.yml
+  include_tasks:
+    file: icinga.yml
+    apply:
+      tags: config
 
 - name: Configure Icingaweb2
   include_tasks: icingaweb.yml

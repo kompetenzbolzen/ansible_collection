@@ -1,0 +1,43 @@
+---
+- name: Create dirs
+  file:
+    state: directory
+    path: /etc/pterodactyl
+  become: yes
+
+- name: Check for changed cert
+  command: /bin/true
+  when: '{{ cert_changed | default(False) }}'
+  notify:
+    - Handle systemd
+
+- name: Install packages
+  apt:
+    name: docker.io
+  become: yes
+
+- name: Enable docker
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Download Wings
+  get_url:
+    url: 'https://github.com/pterodactyl/wings/releases/download/{{ wings_version }}/wings_linux_amd64'
+    checksum: 'sha256:{{ wings_checksum }}'
+    dest: /usr/local/bin/wings
+    owner: root
+    group: root
+    mode: '755'
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Install unit file
+  copy:
+    src: 'wings.service'
+    dest: '/etc/systemd/system/wings.service'
+  become: yes
+  notify: Handle systemd

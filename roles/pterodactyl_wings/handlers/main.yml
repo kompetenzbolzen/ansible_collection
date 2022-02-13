@@ -1,0 +1,7 @@
+---
+- name: Handle systemd
+  systemd:
+    name: wings
+    enabled: yes
+    state: restarted
+  become: yes

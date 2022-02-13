@@ -25,7 +25,10 @@
 
 - name: Install packages
   apt:
-    name: docker-ce docker-ce-cli containerd.io
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
   become: yes
 
 - name: Create dirs

@@ -1,4 +1,33 @@
 ---
+- name: Install GnuPG
+  apt:
+    name: gnupg2
+  become: yes
+
+- name: Docker APT Key
+  apt_key:
+    url: 'https://download.docker.com/linux/debian/gpg'
+    state: present
+  become: yes
+
+- name: Install Docker APT Repository
+  template:
+    src: docker.list.j2
+    dest: /etc/apt/sources.list.d/docker.list
+  become: yes
+  register: install_repo
+
+- name: Update cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
+
+- name: Install packages
+  apt:
+    name: docker-ce docker-ce-cli containerd.io
+  become: yes
+
 - name: Create dirs
   file:
     state: directory
@@ -10,11 +39,6 @@
   when: '{{ cert_changed | default(False) }}'
   notify:
     - Handle systemd
-
-- name: Install packages
-  apt:
-    name: docker.io
-  become: yes
 
 - name: Enable docker
   systemd:

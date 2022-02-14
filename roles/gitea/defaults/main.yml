@@ -1,5 +1,7 @@
 gitea:
   root_url: 'https://gitea.example.com'
+  name: 'Gitea: Git with a cup of tea'
+  webhook_allowed_hosts: '*'
   ssl:
     cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
     key: '/etc/ssl/private/ssl-cert-snakeoil.key'

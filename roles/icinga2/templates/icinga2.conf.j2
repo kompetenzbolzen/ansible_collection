@@ -18,6 +18,7 @@ include <nscp>
 include "features-enabled/*.conf"
 include "ido-mysql.conf"
 include "api_users.conf"
+include "influx.conf"
 
 {% if icinga.config.manage is true %}
 include_recursive "conf.git.d"

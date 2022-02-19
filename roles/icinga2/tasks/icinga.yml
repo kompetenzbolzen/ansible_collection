@@ -47,6 +47,7 @@
     - ido-mysql.conf
     - api_users.conf
     - constants.conf
+    - influx.conf
 
 - name: Install config from git
   git:

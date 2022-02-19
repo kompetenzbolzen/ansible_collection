@@ -25,6 +25,14 @@ icinga:
     smtp_user: ''
     smtp_psw: ''
     from: ''
+  influx:
+    enable: false
+    host: 'localhost'
+    port: 8086
+    ssl: true
+    database: 'icinga'
+    username: 'icinga'
+    password: ''
   constants:
     TicketSalt: ''
     NodeName: '{{ ansible_facts.fqdn }}'

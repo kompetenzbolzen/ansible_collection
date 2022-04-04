@@ -1,0 +1,48 @@
+---
+- name: Install GnuPG
+  apt:
+    name: gnupg2
+  become: yes
+
+- name: Install Grafana STABLE Repository
+  copy:
+    dest: /etc/apt/sources.list.d/grafana.list
+    content: deb https://packages.grafana.com/oss/deb stable main
+  become: yes
+  register: install_repo
+
+- name: Install Grafana Repo Key
+  apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+  become: yes
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
+
+- name: Install Grafana
+  apt:
+    name: grafana
+  become: yes
+  notify: Restart Grafana
+
+- name: Check for changed cert
+  command: /bin/true
+  when: cert_changed
+  notify: Restart Grafana
+
+- name: Install configuration
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/grafana/{{ item }}'
+    owner: root
+    group: grafana
+    mode: '640'
+  become: yes
+  loop:
+    - grafana.ini
+    - ldap.toml
+  notify: Restart Grafana

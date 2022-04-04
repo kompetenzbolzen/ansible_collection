@@ -1,0 +1,61 @@
+; vi: ft=dosini
+
+[server]
+# Protocol (http, https, h2, socket)
+protocol = https
+http_port = {{ grafana.port }}
+
+cert_file = {{ grafana.certificate }}
+cert_key = {{ grafana.key }}
+
+[database]
+type = mysql
+
+host = {{ grafana.db.host }}
+name = {{ grafana.db.name }}
+user = {{ grafana.db.user }}
+password = """{{ grafana.db.password }}"""
+
+ssl_mode = {{ grafana.db.ssl }}
+
+{% if grafana.db.ssl %}
+ca_cert_path = {{ grafana.db.ca }}
+server_cert_name = {{ grafana.db.host }}
+{% endif %}
+
+[security]
+# disable creation of admin user on first start of grafana
+disable_initial_admin_creation = true
+
+[users]
+allow_sign_up = false
+allow_org_create = false
+
+[auth.ldap]
+enabled = {{ grafana.ldap.enabled }}
+
+{% if grafana.ldap.enabled %}
+config_file = /etc/grafana/ldap.toml
+allow_sign_up = true
+{% endif %}
+
+#################################### SMTP / Emailing ##########################
+[smtp]
+;enabled = false
+;host = localhost:25
+;user =
+# If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
+;password =
+;cert_file =
+;key_file =
+;skip_verify = false
+;from_address = admin@grafana.localhost
+;from_name = Grafana
+# EHLO identity in SMTP dialog (defaults to instance_name)
+;ehlo_identity = dashboard.example.com
+# SMTP startTLS policy (defaults to 'OpportunisticStartTLS')
+;startTLS_policy = NoStartTLS
+
+[emails]
+;welcome_email_on_sign_up = false
+;templates_pattern = emails/*.html

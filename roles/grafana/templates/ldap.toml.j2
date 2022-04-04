@@ -1,0 +1,33 @@
+# vi: ft=dosini
+[[servers]]
+host = "{{ grafana.ldap.host }}"
+port = {{ grafana.ldap.port }}
+use_ssl = {{ grafana.ldap.use_ssl | string | lower }}
+start_tls = {{ grafana.ldap.start_tls | string | lower }}
+ssl_skip_verify = {{ grafana.ldap.ssl_skip_verify | string | lower }}
+
+bind_dn = "{{ grafana.ldap.bind_dn }}"
+bind_password = """{{ grafana.ldap.bind_pw }}"""
+
+search_filter = "{{ grafana.ldap.search_filter }}"
+search_base_dns = {{ grafana.ldap.base_dns }}
+
+[servers.attributes]
+{% for attr, value in grafana.ldap.attributes.items() %}
+{{ attr }} = "{{ value }}"
+{% endfor %}
+
+# Map ldap groups to grafana org roles
+{% for i in grafana.ldap.group_mappings %}
+[[servers.group_mappings]]
+{% for key, value in i.items() %}
+{% if value is string %}
+{{ key }} = "{{ value }}"
+{% elif value is sameas true or value is sameas false %}
+{{ key }} = {{ value | string | lower }}
+{% else %}
+{{ key }} = {{ value }}
+{% endif %}
+{% endfor %}
+
+{% endfor %}

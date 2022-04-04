@@ -1,0 +1,35 @@
+---
+grafana:
+  port: 8443
+  fqdn: 'grafana.example.com'
+  certificate: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+  key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+  db:
+    host: 'db.example.com'
+    name: 'grafana'
+    user: 'grafana'
+    password: 'p4ssword'
+    ssl: true
+    ca: '/etc/ssl/certs/ca-certificates.crt'
+  ldap:
+    enabled: false
+    host: ldap.example.com
+    port: 636
+    use_ssl: true
+    start_tls: false
+    ssl_skip_verify: false
+    bind_dn: ''
+    bind_pw: ''
+    search_filter: '(&(uid=%s))'
+    base_dns: '["ou=users,dc=example,dc=com"]'
+    attributes:
+      name: 'givenName'
+      surname: 'sn'
+      username: 'uid'
+      member_of: 'memberOf'
+      email: 'mail'
+    group_mappings:
+      - group_dn: ''
+        org_role: ''
+        grafana_admin: false
+        org_id: 1

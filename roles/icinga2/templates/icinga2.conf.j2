@@ -20,6 +20,10 @@ include "ido-mysql.conf"
 include "api_users.conf"
 include "influx.conf"
 
+{% for dir in icinga.extra_conf_dirs %}
+include_recursive "{{ dir }}"
+{% endfor %}
+
 {% if icinga.config.manage is true %}
 include_recursive "conf.git.d"
 {% else %}

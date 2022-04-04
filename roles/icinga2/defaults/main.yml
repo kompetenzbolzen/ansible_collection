@@ -14,6 +14,7 @@ icinga:
     crt: '/etc/ssl/cert/ssl-cert-snakeoil.pem'
     key: '/etc/ssl/private/ssl-cert-snakeoil.key'
     ca: '/etc/ssl/certs/ca-certificates.crt'
+  extra_conf_dirs: []
   config:
     manage: false
     git_url: ''

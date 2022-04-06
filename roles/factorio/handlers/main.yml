@@ -1,0 +1,7 @@
+---
+- name: Handle systemd
+  systemd:
+    name: factorio.service
+    state: restarted
+    enabled: yes
+  become: yes

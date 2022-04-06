@@ -1,0 +1,17 @@
+# vi: ft=systemd
+[Unit]
+Description=Factorio dedicated server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=factorio
+Group=factorio
+Restart=on-failure
+RestartSec=30s
+WorkingDirectory=/opt/factorio
+ExecStart=/opt/factorio/run.sh
+
+[Install]
+WantedBy=multi-user.target

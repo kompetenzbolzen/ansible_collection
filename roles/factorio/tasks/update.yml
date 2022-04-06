@@ -1,0 +1,23 @@
+---
+- name: Stop factorio
+  systemd:
+    name: factorio.service
+    state: stopped
+  become: yes
+
+- name: Download factorio
+  get_url:
+    url: "https://factorio.com/get-download/stable/headless/linux64"
+    dest: /opt/factorio/factorio.tar.gz
+  become_user: factorio
+  become: yes
+
+- name: Unpack factorio
+  unarchive:
+    src: /opt/factorio/factorio.tar.gz
+    dest: /opt/factorio/
+    remote_src: yes
+  become_user: factorio
+  become: yes
+  notify:
+    - Handle systemd

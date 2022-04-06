@@ -1,0 +1,96 @@
+---
+- name: create user
+  user:
+    name: factorio
+    home: /opt/factorio
+    create_home: yes
+    shell: /bin/bash
+    state: present
+  become: yes
+
+- name: Get Version
+  uri:
+    url: https://factorio.com/api/latest-releases
+    method: GET
+    return_content: yes
+  delegate_to: localhost
+  register: factorio_api_latest
+  when: factorio_version is not defined
+
+- name: Set Version
+  set_fact:
+    factorio_version: '{{ (factorio_api_latest.content | from_json).stable.headless }}'
+    cachaeble: no
+  when: factorio_version is not defined
+
+- name: Install runscript
+  copy:
+    src: run.sh
+    dest: /opt/factorio/run.sh
+    mode: '750'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Install running config
+  copy:
+    content: |
+      SAVEFILE={{ factorio_save }}
+    dest: /opt/factorio/cfg.sh
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Install JSON configs
+  copy:
+    content: '{{ factorio_config[item] | to_json }}'
+    dest: '/opt/factorio/{{ item }}-config.json'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+  loop:
+    - mapgen
+    - map
+    - server
+
+- name: Install admin file
+  copy:
+    content: '{{ factorio_admins | to_json }}'
+    dest: '/opt/factorio/factorio/server-adminlist.json'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: systemd units
+  copy:
+    dest: '/etc/systemd/system/factorio.service'
+    src: factorio.service
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Determine factorio version
+  slurp:
+    src: /opt/factorio/factorio/data/base/info.json
+  register: factorio_current_version
+  ignore_errors: yes
+
+- name: assert version
+  assert:
+    that:
+      - not factorio_current_version.failed
+      - (factorio_current_version.content | b64decode | from_json).version is version( factorio_version, '>=')
+  ignore_errors: yes
+  register: version_check
+
+- name: Install new factorio version
+  include: update.yml
+  when: version_check.failed

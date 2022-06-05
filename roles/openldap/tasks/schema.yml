@@ -1,0 +1,44 @@
+- name: search for entry
+  community.general.ldap_search:
+    dn: 'cn=schema,cn=config'
+    filter: '(&(objectClass=olcSchemaConfig)(cn={*}openssh-lpk))'
+    scope: children
+  become: yes
+  register: schemareg
+
+- name: Check results
+  assert:
+    that:
+      - schemareg['failed'] == false
+      - schemareg['results'] | length <= 1
+    fail_msg: "More than one occurance of {{ item['cn'] }}! clean them out."
+
+- name: "Install schema: create entry"
+  community.general.ldap_entry:
+    dn: 'cn={{ item["cn"] }},cn=schema,cn=config'
+    state: present
+    objectClass: olcSchemaConfig
+  become: yes
+  when: schemareg['results'] | length == 0
+
+- name: "Install schema: set attributes"
+  community.general.ldap_attrs:
+    dn: '{{ item["cn"] }},cn=schema,cn=config'
+    state: present
+    attributes:
+      objectClass: olcSchemaConfig
+      olcAttributeTypes: '{{ item["olcAttributeTypes"] }}'
+      olcObjectClasses: '{{ item["olcObjectClasses"] }}'
+  become: yes
+  when: schemareg['results'] | length == 0
+
+- name: Update schema
+  community.general.ldap_attrs:
+    dn: '{{ schemareg["results"][0]["dn"] }}'
+    state: exact
+    attributes:
+      objectClass: olcSchemaConfig
+      olcAttributeTypes: '{{ item["olcAttributeTypes"] }}'
+      olcObjectClasses: '{{ item["olcObjectClasses"] }}'
+  become: yes
+  when: schemareg['results'] | length > 0

@@ -73,6 +73,10 @@
     state: present
   become: yes
 
+- name: Install custom schema
+  include_tasks: schema.yml
+  loop: '{{ ldap.schema | default([]) }}'
+
 #
 # schema
 #

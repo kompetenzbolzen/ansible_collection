@@ -92,6 +92,7 @@
         - >-
           {0}to attrs=userPassword
           by self write
+          by group/groupOfNames/member=cn=external_auth,ou=groups,{{ ldap.base }} read
           by anonymous auth
           by * none
         - >-
@@ -139,13 +140,16 @@
 
 - name: Create LDAP Admin group
   community.general.ldap_entry:
-    dn: 'cn=ldap_admin,ou=groups,{{ ldap.base }}'
+    dn: 'cn={{ item }},ou=groups,{{ ldap.base }}'
     objectClass:
       - groupOfNames
       - top
     attributes:
-      cn: 'ldap_admin'
+      cn: '{{ item }}'
       member: ''
     server_uri: ldap://localhost
     bind_dn: '{{ ldap.root_dn }}'
     bind_pw: '{{ ldap.root_pw }}'
+  loop:
+    - ldap_admin
+    - external_auth

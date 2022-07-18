@@ -1,0 +1,58 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - freeradius
+      - freeradius-ldap
+  become: yes
+
+- name: Install config
+  template:
+    src: ldap.j2
+    dest: /etc/freeradius/3.0/mods-available/ldap
+  become: yes
+  notify: freeradius
+
+- name: Install clients
+  template:
+    src: clients.conf.j2
+    dest: /etc/freeradius/3.0/clients.ansible.conf
+  become: yes
+  notify: freeradius
+
+- name: Clients
+  lineinfile:
+    path: /etc/freeradius/3.0/radiusd.conf
+    search_string: '$INCLUDE clients.ansible.conf'
+    line: '$INCLUDE clients.ansible.conf'
+    insertafter: '$INCLUDE clients.conf'
+  become: yes
+  notify: freeradius
+
+- name: Enable LDAP Authentication
+  file:
+    src: '/etc/freeradius/3.0/mods-available/ldap'
+    dest: '/etc/freeradius/3.0/mods-enabled/ldap'
+    state: 'link'
+  become: yes
+  notify: freeradius
+
+- name: Set EAP Certificate
+  lineinfile:
+    path: /etc/freeradius/3.0/mods-available/eap
+    search_string: '{{ item["s"] }}'
+    line: '{{ item["l"] }}'
+    insertafter: 'tls-config tls-common'
+  become: yes
+  notify: freeradius
+  loop:
+    - s: 'private_key_password'
+      l: '# private_key_password = notset'
+    - s: 'private_key_file ='
+      l: 'private_key_file = {{ radius.cert.privkey }}'
+    - s: 'certificate_file ='
+      l: 'certificate_file = {{ radius.cert.cert }}'
+    - s: 'ca_file ='
+      l: 'ca_file = {{ radius.cert.ca }}'
+    - s: 'check_crl ='
+      l: 'check_crl = no'

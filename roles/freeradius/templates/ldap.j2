@@ -1,0 +1,20 @@
+# vi: ft=conf
+# This file is managed by Ansible. Manual changes will be reverted.
+
+ldap {
+        server   = "{{ radius.ldap.server }}"
+        identity = "{{ radius.ldap.bind_user }}"
+        password = "{{ radius.ldap.bind_pwd }}"
+        user {
+                base_dn  = "{{ radius.ldap.user_base }}"
+                filter   = "{{ radius.ldap.user_filter }}"
+        }
+        sasl {
+                # This block needs to exist, but can be empty.
+                # SASL mechanism
+                #mech = 'PLAIN'
+        }
+        update {
+                control:Password-With-Header    += 'userPassword'
+        }
+}

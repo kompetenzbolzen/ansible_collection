@@ -1,0 +1,9 @@
+# vi: ft=conf
+
+{% for item in radius.clients %}
+client {{ item.name }} {
+	ipaddr = {{ item.ip }}
+	secret = {{ item.secret }}
+}
+
+{% endfor %}

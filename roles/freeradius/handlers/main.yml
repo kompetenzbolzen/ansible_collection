@@ -1,0 +1,6 @@
+---
+- name: freeradius
+  systemd:
+    name: freeradius
+    state: restarted
+  become: yes

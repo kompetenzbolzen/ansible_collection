@@ -1,0 +1,17 @@
+---
+radius:
+  ldap:
+    server: 'ldap://ldap.example.com'
+    bind_user: 'uid=user,dc=example,dc=com'
+    bind_pwd: 'Password'
+    user_base: 'ou=users,dc=example,dc=com'
+    user_filter: '(uid=%{User-Name})'
+  clients:
+    - name: asdfasdf
+      ip: '1.1.1.1'
+      secret: 'supersecret'
+  cert:
+    privkey: '/etc/ssl/private/ssl-cert-snakeoil.key'
+    cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+    ca: '/etc/ssl/certs/ca-certificates.crt'
+

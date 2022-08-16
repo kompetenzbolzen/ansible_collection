@@ -47,6 +47,7 @@
   pip:
     name: calibreweb[{{ features | join(",") }}]
   become: true
+  become_user: calibre
 
 - name: Create systemd unit
   template:

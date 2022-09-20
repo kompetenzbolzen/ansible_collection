@@ -1,5 +1,6 @@
 ---
 cert_name: '{{ ansible_facts.fqdn }}'
+common_name: '{{ ansible_facts.fqdn }}'
 key_path: '/etc/ssl/private/'
 cert_path: '/etc/ssl/certs/'
 alt_name: '{{  "DNS:" + ansible_facts.fqdn  }}'
@@ -13,3 +14,14 @@ signed_certificate:
   privkey_path: '/invalid'
   privkey_passphrase: ''
   cert_content: ''
+
+use_acme: false
+
+acme:
+  directory: https://acme-v01.api.letsencrypt.org/directory
+  renew_at: 10
+  account_email: mail@example.com
+  account_key: 'INVALID'
+  gandi:
+    api_key: ''
+    domain: ''

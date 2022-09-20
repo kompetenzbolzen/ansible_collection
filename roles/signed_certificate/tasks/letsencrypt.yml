@@ -1,0 +1,81 @@
+---
+- name: Create CSR
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: '{{ key_path }}/{{ cert_name }}.key'
+    common_name: '{{ common_name }}'
+    subject_alt_name: '{{ alt_name }}'
+  register: request
+  become: yes
+
+- name: Create a challenge using account key file.
+  community.crypto.acme_certificate:
+    account_key_content: '{{ acme.account_key }}'
+    modify_account: False
+    dest: '{{ cert_path }}/{{ cert_name }}.pem'
+    fullchain_dest: '{{ cert_path }}/{{ cert_name }}.fullchain.pem'
+    csr_content: '{{ request.csr }}'
+    challenge: dns-01
+    acme_directory: '{{ acme.directory }}'
+    acme_version: 2
+    remaining_days: '{{ acme.renew_at }}'
+  register: dns_challenge
+
+- name: Create DNS Challenge DNS Entry in LiveDNS
+  community.general.gandi_livedns:
+    domain: '{{ acme.gandi.domain }}'
+    record: '{{ item.key }}.'
+    type: TXT
+    ttl: 300
+    values: "{{ item.value | map('regex_replace', '^(.*)$', '\"\\1\"' ) | list }}"
+    api_key: '{{ acme.gandi.api_key }}'
+    state: present
+  loop: "{{ dns_challenge.challenge_data_dns | dict2items }}"
+  when: dns_challenge is changed
+
+- name: Wait a bit
+  pause:
+    seconds: 20
+  when: dns_challenge is changed
+
+- name: Validate the challenge and install certificates and chain
+  community.crypto.acme_certificate:
+    account_key_content: '{{ acme.account_key }}'
+    modify_account: False
+    csr_content: '{{ request.csr }}'
+    dest: '{{ cert_path }}/{{ cert_name }}.pem'
+    fullchain_dest: '{{ cert_path }}/{{ cert_name }}.fullchain.pem'
+    challenge: dns-01
+    acme_directory: '{{ acme.directory }}'
+    acme_version: 2
+    remaining_days: '{{ acme.renew_at }}'
+    data: '{{ dns_challenge }}'
+  register: dns_challenge
+  when: dns_challenge is changed
+  become: yes
+
+- name: Remove DNS Challenge DNS Entry in LiveDNS
+  community.general.gandi_livedns:
+    domain: '{{ acme.gandi.domain }}'
+    record: '{{ item.key }}.'
+    type: TXT
+    api_key: '{{ acme.gandi.api_key }}'
+    state: absent
+  loop: "{{ dns_challenge.challenge_data_dns | dict2items }}"
+  when: dns_challenge is changed
+
+# ===========================
+
+- name: Adjust file permissions
+  file:
+    path: '{{ item }}'
+    owner: '{{ owner }}'
+    group: '{{ group }}'
+  loop:
+    - '{{ cert_path }}/{{ cert_name }}.pem'
+    - '{{ cert_path }}/{{ cert_name }}.fullchain.pem'
+  become: yes
+
+- name: Set cert_changed flag
+  set_fact:
+    cert_changed: True
+  when: dns_challenge is changed

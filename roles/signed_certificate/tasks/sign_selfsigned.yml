@@ -2,7 +2,7 @@
 - name: Create CSR
   community.crypto.openssl_csr_pipe:
     privatekey_path: '{{ key_path }}/{{ cert_name }}.key'
-    common_name: '{{ ansible_facts.fqdn }}'
+    common_name: '{{ common_name }}'
     subject_alt_name: '{{ alt_name }}'
   register: request
   become: yes

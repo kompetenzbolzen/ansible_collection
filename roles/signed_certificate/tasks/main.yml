@@ -35,27 +35,10 @@
   become: yes
   when: not key_check.failed
 
-- name: Read Existing Certificate
-  community.crypto.x509_certificate_info:
-    path: '{{ cert_path }}/{{ cert_name }}.pem'
-    valid_at:
-      point_1: '{{ signed_certificate.renew_at }}'
-  ignore_errors: yes
-  become: yes
-  register: existing_cert
-
-- name: Check Certificate
-  assert:
-    that:
-      - existing_cert.valid_at.point_1
-      - not existing_cert.failed
-      - existing_cert.subject.commonName == ansible_facts.fqdn
-      - existing_cert.issuer.commonName == '{{ signed_certificate.issuer_cn }}'
-    success_msg: Certificate is valid
-    fail_msg: Certificate is not valid. creating a new one.
-  ignore_errors: yes
-  register: cert_assert
+- name: Trigger Cert Generation
+  include_tasks: selfsigned.yml
+  when: use_acme == false
 
 - name: Trigger Cert Generation
-  include: sign.yml
-  when: cert_assert.failed
+  include_tasks: letsencrypt.yml
+  when: use_acme == true

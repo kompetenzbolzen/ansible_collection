@@ -1,0 +1,28 @@
+---
+- name: Create ACME Account
+  hosts: localhost
+  vars:
+    directory: 'https://acme-staging-v02.api.letsencrypt.org/directory'
+    contact:
+      - 'mailto:mail@assdfkjsdhf.com'
+  tasks:
+    - name: Create private key
+      community.crypto.openssl_privatekey:
+        path: acme_account.key
+        return_content: True
+        size: 2048
+      register: privkey
+
+    - name: Create ACME Account
+      community.crypto.acme_account:
+        acme_directory: '{{ directory }}'
+        acme_version: 2
+        account_key_content: '{{ privkey.privatekey }}'
+        contact: '{{ contact }}'
+        state: present
+        terms_agreed: True
+      register: account
+
+    - name: Print account
+      debug:
+        var: account

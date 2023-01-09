@@ -1,0 +1,12 @@
+# vi: ft=nginx
+server {
+    listen       443 ssl;
+    server_name  {{ nginx_reverse_proxy.server_name }} ;
+
+    ssl_certificate {{ nginx_reverse_proxy.cert }};
+    ssl_certificate_key {{ nginx_reverse_proxy.key }};
+
+    location / {
+        proxy_pass {{ nginx_reverse_proxy.proxy_address }};
+    }
+}

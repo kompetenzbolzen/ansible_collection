@@ -17,7 +17,7 @@ id_provider = ldap
 auth_provider = ldap
 chpass_provider = ldap
 cache_credentials = True
-access_provider = simple
+access_provider = ldap
 
 ldap_id_use_start_tls = {{ sssd_ldap.start_tls }}
 ldap_tls_reqcert = demand

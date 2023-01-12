@@ -10,7 +10,7 @@
   when:
     - '{{ cert_changed | default(False) }}'
   notify:
-    - Restart nginx
+    - restart nginx
 
 - name: Install nginx config
   template:

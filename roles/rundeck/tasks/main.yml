@@ -1,0 +1,33 @@
+---
+- name: Install GnuPG
+  apt:
+    name: gnupg2
+  become: yes
+
+- name: APT Key
+  apt_key:
+    url: 'https://packages.rundeck.com/pagerduty/rundeck/gpgkey'
+    state: present
+  become: yes
+
+- name: Install Rundeck APT Repository
+  template:
+    src: rundeck.list.j2
+    dest: /etc/apt/sources.list.d/rundeck.list
+  become: yes
+  register: install_repo
+
+- name: Update cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: install_repo.changed
+
+- name: Install Packages
+  apt:
+    name:
+      - openjdk-11-jre-headless
+      - rundeck
+  notify: Enable Rundeck
+
+

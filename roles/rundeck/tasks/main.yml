@@ -28,6 +28,7 @@
     name:
       - openjdk-11-jre-headless
       - rundeck
+  become: yes
   notify: Enable Rundeck
 
 

@@ -35,3 +35,12 @@
     line: 'session required pam_mkhomedir.so skel=/etc/skel/ umask=0022'
     insertafter: '^session optional pam_sss\.so'
   become: yes
+
+- name: Configure SSH Key login via LDAP
+  copy:
+    src: sshd_sss_authorized_keys.conf
+    dest: /etc/ssh/sshd_config.d/sss_authorized_keys.conf
+  become: yes
+  when: sssd_ldap.sshd_keys_from_sss | default(false)
+  notify:
+    - Restart sshd

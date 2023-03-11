@@ -8,3 +8,4 @@ sssd_ldap:
   user_dn: 'ou=users,dc=example,dc=com'
   group_dn: 'ou=groups,dc=example,dc=com'
   access_filter: '&(objectClass=posixAccount)'
+  sshd_keys_from_sss: false

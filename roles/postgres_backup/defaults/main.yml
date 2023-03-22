@@ -1,0 +1,5 @@
+---
+pgsql_backup:
+  rpeo_dir: /var/backup/borg_postgres/
+  repo_key: 'CHANGEME'
+

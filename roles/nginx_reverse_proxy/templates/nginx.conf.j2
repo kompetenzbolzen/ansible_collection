@@ -6,6 +6,8 @@ server {
     ssl_certificate {{ nginx_reverse_proxy.cert }};
     ssl_certificate_key {{ nginx_reverse_proxy.key }};
 
+    {{ nginx_reverse_proxy.nginx_options | default("") }}
+
     location / {
         proxy_pass {{ nginx_reverse_proxy.proxy_address }};
     }

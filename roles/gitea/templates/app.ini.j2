@@ -44,7 +44,7 @@ INTERNAL_TOKEN = {{ int_tok.content }}
 [service]
 DISABLE_REGISTRATION = true
 
-REQUIRE_SIGNIN_VIEW = true
+REQUIRE_SIGNIN_VIEW = {{ gitea.require_signing_view }}
 ENABLE_NOTIFY_MAIL = {{ gitea.mail.enable }}
 
 
@@ -79,3 +79,7 @@ PATH =
 
 [oauth2]
 ENABLE = false
+
+[actions]
+ENABLED = {{ gitea.actions }}
+

@@ -37,6 +37,18 @@
     state: directory
   become: yes
 
+- name: pull sha256sum
+  uri:
+    url: 'https://dl.gitea.io/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64.sha256'
+    method: GET
+    return_content: yes
+  register: gitea_sha256_raw
+
+- name: set sha256sum
+  set_fact:
+    gitea_sha256: '{{ (gitea_sha256_raw.content | split(" "))[0] }}'
+    cacheable: false
+
 - name: Check for update
   stat:
     path: /usr/local/bin/gitea
@@ -47,7 +59,7 @@
 - name: perform update
   include: update.yml
   when:
-    - (not gitea_bin_stat.stat.exists) or (gitea_bin_stat.stat.checksum != gitea.version.sha)
+    - (not gitea_bin_stat.stat.exists) or (gitea_bin_stat.stat.checksum != gitea_sha256)
 
 - name: Check if initial setup is needed
   include_tasks: secrets.yml

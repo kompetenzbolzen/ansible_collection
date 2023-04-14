@@ -8,7 +8,6 @@ gitea:
     key: '/etc/ssl/private/ssl-cert-snakeoil.key'
   version:
     ver: '1.15.3'
-    sha: 'd08d63b1202ece7b701c2c254776a38e0637995e8ff3c6855581ee8e37e9b3fb'
   ldap:
     enable: true
     security: 'starttls'

@@ -1,0 +1,28 @@
+---
+gitea_runner:
+  version:
+    ver: 0.1.2
+  gitea_url: 'https://gitea.example.com/'
+  runner_token: 'TOKEN'
+  tags:
+    ubuntu-latest: docker://node:16-bullseye
+    python-latest: docker://docker:latest
+  config:
+    log:
+      level: info
+    runner:
+      file: /var/lib/act_runner/runner.conf
+      capacity: 1
+      envs: {}
+      env_file: ''
+      timeout: 3h
+      insecure: false
+      fetch_timeout: 5s
+      fetch_interval: 2s
+    cache:
+      enabled: true
+      dir: /var/lib/act_runner/runner.conf
+      host: ''
+      port: 0
+    container:
+      network_mode: bridge

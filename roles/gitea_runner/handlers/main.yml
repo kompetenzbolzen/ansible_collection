@@ -1,0 +1,7 @@
+---
+- name: Handle systemd
+  systemd:
+    name: act_runner.service
+    enabled: true
+    state: restarted
+  become: true

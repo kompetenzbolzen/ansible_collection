@@ -1,0 +1,87 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - docker.io
+  become: true
+
+- name: Create User
+  user:
+    name: runner
+    system: true
+    state: present
+    groups:
+      - docker
+  become: true
+
+- name: Folder structure
+  file:
+    path: '{{ item }}'
+    owner: runner
+    group: runner
+    mode: '750'
+    state: directory
+  become: true
+  loop:
+    - /var/lib/act_runner/
+    - /etc/act_runner/
+
+- name: Configuration
+  copy:
+    dest: /etc/act_runner/config.yaml
+    owner: runner
+    group: runner
+    content: '{{ gitea_runner.config | to_yaml }}'
+  become: true
+
+- name: pull sha256sum
+  uri:
+    url: 'https://dl.gitea.io/act_runner/{{ gitea_runner.version.ver }}/act_runner-{{ gitea_runner.version.ver }}-linux-amd64.sha256'
+    method: GET
+    return_content: yes
+  register: runner_sha256
+
+- name: Download Gitea act_runner
+  get_url:
+    url: 'https://dl.gitea.io/act_runner/{{ gitea_runner.version.ver }}/act_runner-{{ gitea_runner.version.ver }}-linux-amd64'
+    checksum: 'sha256:{{ (runner_sha256.content | split(" "))[0] }}'
+    dest: /usr/local/bin/act_runner
+    owner: root
+    group: root
+    mode: '755'
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Install gitea unit file
+  copy:
+    src: act_runner.service
+    dest: /etc/systemd/system/act_runner.service
+  become: yes
+  notify:
+    - Handle systemd
+
+- debug:
+    msg: '--labels {% for k, v in gitea_runner.tags.items() %}{{ k }}:{{ v }},{% endfor %}'
+
+
+- name: Register runner
+  shell:
+    cmd: '/usr/local/bin/act_runner -c /etc/act_runner/config.yaml register --instance {{ gitea_runner.gitea_url }} --token {{ gitea_runner.runner_token }} --no-interactive --labels {% for k, v in gitea_runner.tags.items() %}{{ k }}:{{ v }},{% endfor %}'
+    creates: '/var/lib/act_runner/runner.conf'
+  become_user: runner
+  become: true
+  notify:
+    - Handle systemd
+
+- name: Configure labels
+  lineinfile:
+    path: '/var/lib/act_runner/runner.conf'
+    state: present
+    insertafter: '"labels"'
+    line: '    "{{ item.key }}:{{ item.value }}",'
+    search_string: '    "{{ item.key }}:{{ item.value }}",'
+  with_dict: '{{ gitea_runner.tags }}'
+  become: true
+  notify:
+    - Handle systemd

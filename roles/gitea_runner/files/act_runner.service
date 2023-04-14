@@ -1,0 +1,15 @@
+[Unit]
+Description=Gitea act_runner
+After=syslog.target
+After=network.target
+
+[Service]
+RestartSec=2s
+Type=simple
+User=runner
+Group=runner
+ExecStart=/usr/local/bin/act_runner -c /etc/act_runner/config.yaml daemon
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

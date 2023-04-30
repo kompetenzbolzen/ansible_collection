@@ -47,7 +47,6 @@
       - mailutils
       - libsasl2-modules
       - sasl2-bin
-      - icingaweb2-module-businessprocess
   become: yes
 
 - name: Securing MariaDB installation

@@ -80,8 +80,8 @@
     path: '/etc/icingaweb2/enabledModules/{{ item }}'
     src: '/usr/share/icingaweb2/modules/{{ item }}'
     state: link
-    owner: www-data
-    group: icingaweb2
+    owner: root
+    group: root
   become: yes
   with_items: '{{ icingaweb.enabled_modules }}'
 

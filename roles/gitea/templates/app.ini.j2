@@ -8,6 +8,7 @@ RUN_MODE = prod
 ROOT = /home/git/gitea-repositories
 
 [server]
+APP_DATA_PATH = /home/git/
 PROTOCOL = https
 DOMAIN = {{ ansible_facts.fqdn }}
 ROOT_URL = {{ gitea.root_url }}
@@ -54,7 +55,6 @@ ALLOWED_HOST_LIST = {{ gitea.webhook_allowed_hosts }}
 [mailer]
 ENABLED = {{ gitea.mail.enable }}
 {% if gitea.mail.enable %}
-SEND_BUFFER_LEN = 100
 SUBJECT_PREFIX = {{ gitea.mail.subject_prefix }}
 HOST = {{ gitea.mail.smtp_host }}
 SKIP_VERIFY = {{ gitea.mail.skip_verify }}
@@ -67,6 +67,9 @@ MAILER_TYPE = smtp
 SENDMAIL_PATH = sendmail
 SENDMAIL_ARGS =
 SENDMAIL_TIMEOUT = 5m
+
+[queue.mailer]
+SEND_BUFFER_LEN = 100
 {% endif %}
 
 [log]

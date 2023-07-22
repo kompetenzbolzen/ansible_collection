@@ -8,7 +8,7 @@ RUN_MODE = prod
 ROOT = /home/git/gitea-repositories
 
 [server]
-APP_DATA_PATH = /home/git/
+APP_DATA_PATH = /var/lib/gitea/data
 PROTOCOL = https
 DOMAIN = {{ ansible_facts.fqdn }}
 ROOT_URL = {{ gitea.root_url }}

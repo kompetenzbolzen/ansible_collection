@@ -10,5 +10,6 @@ server {
 
     location / {
         proxy_pass {{ nginx_reverse_proxy.proxy_address }};
+        {{ nginx_reverse_proxy.nginx_options_location_root | default("") }}
     }
 }

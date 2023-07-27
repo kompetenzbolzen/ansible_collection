@@ -8,13 +8,6 @@
       - python3-ldap
   become: yes
 
-- name: Check for changed cert
-  command: /bin/true
-  when:
-    - cert_changed
-  notify:
-    - Restart slapd
-
 #
 # Global server config
 #
@@ -88,21 +81,7 @@
     dn: olcDatabase={1}mdb,cn=config
     attributes:
       olcSuffix: '{{ ldap.base }}'
-      olcAccess:
-        - >-
-          {0}to attrs=userPassword
-          by self write
-          by group/groupOfNames/member=cn=external_auth,ou=groups,{{ ldap.base }} read
-          by anonymous auth
-          by * none
-        - >-
-          {1}to attrs=shadowLastChange
-          by self write
-          by * read
-        - >-
-          {2}to *
-          by users read
-          by group/groupOfNames/member=cn=ldap_admin,ou=groups,{{ ldap.base }} manage
+      olcAccess: '{{ ldap.access_control }}'
       olcRootDN: '{{ ldap.root_dn }}'
       olcRootPW: '{{ ldap.root_pw_hash }}'
     state: exact
@@ -132,15 +111,11 @@
     server_uri: ldap://localhost
     bind_dn: '{{ ldap.root_dn }}'
     bind_pw: '{{ ldap.root_pw }}'
-  loop:
-    - users
-    - apps
-    - groups
-    - unixgroups
+  loop: '{{ ldap.ous }}'
 
 - name: Create LDAP Admin group
   community.general.ldap_entry:
-    dn: 'cn={{ item }},ou=groups,{{ ldap.base }}'
+    dn: 'cn={{ item }},{{ ldap.groupsofnames.in }}'
     objectClass:
       - groupOfNames
       - top
@@ -150,6 +125,4 @@
     server_uri: ldap://localhost
     bind_dn: '{{ ldap.root_dn }}'
     bind_pw: '{{ ldap.root_pw }}'
-  loop:
-    - ldap_admin
-    - external_auth
+  loop: '{{ ldap.groupsofnames.names }}'

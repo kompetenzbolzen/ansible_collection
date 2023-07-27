@@ -11,4 +11,28 @@ ldap:
     key: '/etc/ssl/private/ssl-cert-snakeoil.key'
     cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
   schema: []
-
+  ous:
+    - users
+    - apps
+    - groups
+    - unixgroups
+  groupsofnames:
+    in: 'ou=groups,dc=example,dc=com'
+    names:
+      - ldap_admin
+      - external_auth
+  access_control:
+    - >-
+      {0}to attrs=userPassword
+      by self write
+      by group/groupOfNames/member=cn=external_auth,ou=groups,dc=example,dc=com read
+      by anonymous auth
+      by * none
+    - >-
+      {1}to attrs=shadowLastChange
+      by self write
+      by * read
+    - >-
+      {2}to *
+      by users read
+      by group/groupOfNames/member=cn=ldap_admin,ou=groups,dc=example,dc=com manage

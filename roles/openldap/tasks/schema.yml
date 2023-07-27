@@ -1,7 +1,7 @@
 - name: search for entry
   community.general.ldap_search:
     dn: 'cn=schema,cn=config'
-    filter: '(&(objectClass=olcSchemaConfig)(cn={*}openssh-lpk))'
+    filter: '(&(objectClass=olcSchemaConfig)(cn={*}{{ item["cn"] }}))'
     scope: children
   become: yes
   register: schemareg

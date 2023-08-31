@@ -1,0 +1,52 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - nginx
+  become: true
+
+- name: Install site config
+  template:
+    src: nginx.conf.j2
+    dest: '/etc/nginx/sites-available/{{ item.key }}'
+  become: true
+  with_dict: '{{ nginx.servers }}'
+  notify:
+    - restart nginx
+
+- name: Enable sites
+  file:
+    src: '/etc/nginx/sites-available/{{ item.key }}'
+    dest: '/etc/nginx/sites-enabled/{{ item.key }}'
+    state: link
+  become: true
+  with_dict: '{{ nginx.servers }}'
+  notify:
+    - restart nginx
+
+- name: Find old site links
+  find:
+    paths: '/etc/nginx/sites-enabled/'
+    excludes: '{{ nginx.servers.keys() }}'
+    file_type: link
+    depth: false
+  become: true
+  register: links_to_delete
+
+- name: Find old site files
+  find:
+    paths: '/etc/nginx/sites-available/'
+    excludes: '{{ nginx.servers.keys() }}'
+    file_type: file
+    depth: false
+  become: true
+  register: files_to_delete
+
+- name: Delete old site files and links
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ links_to_delete.files + files_to_delete.files }}"
+  become: true
+  notify:
+    - restart nginx

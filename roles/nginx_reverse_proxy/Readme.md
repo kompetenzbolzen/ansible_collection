@@ -1,5 +1,7 @@
 # nginx_reverse_proxy
 
+Deprecated. Use `nginx` instead.
+
 Small reverse proxy for local HTTPS proxieing.
 
 ```yml

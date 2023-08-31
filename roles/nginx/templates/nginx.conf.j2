@@ -1,0 +1,18 @@
+# vi: ft=nginx
+# This file is managed by Ansible. DO NOT CHANGE!
+
+{%- macro add_tabs(n) %}{% for i in range(n) %}    {%endfor%}{% endmacro %}
+{% macro procval(key, val, tabs) -%}
+{% if val is mapping %}{{ add_tabs(tabs) }}{{ key }} {
+{% for k, v in val.items() %}{{ procval(k,v,tabs+1) }}
+{{ add_tabs(tabs) }}{% endfor -%} }
+{%- else -%}
+{{ add_tabs(tabs) }}{{ key }} {{ val }};
+{%- endif -%}
+{% endmacro %}
+
+server {
+{% for key in item.value -%}
+{{ procval(key, item.value[key], 1) }}
+{% endfor -%}
+}

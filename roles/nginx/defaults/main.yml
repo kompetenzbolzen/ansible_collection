@@ -1,0 +1,10 @@
+---
+nginx:
+  servers:
+    default:
+      listen: 443 ssl
+      server_name: '{{ ansible_facts.fqdn }}'
+      ssl_certificate: '/etc/ssl/certs/{{ ansible_facts.fqdn }}.pem'
+      ssl_certificate_key: '/etc/ssl/private/{{ ansible_facts.fqdn }}.key'
+      'location /':
+        proxy_pass: http://localhost:8080

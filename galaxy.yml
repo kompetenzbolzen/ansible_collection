@@ -1,6 +1,6 @@
 namespace: kompetenzbolzen
 name: stuff
-version: 0.21.0
+version: 0.21.1
 readme: README.md
 authors:
 - Jonas Gunz <himself@jonasgunz.de>

@@ -6,7 +6,7 @@
 {% if val is mapping %}{{ add_tabs(tabs) }}{{ key }} {
 {% for k, v in val.items() %}{{ procval(k,v,tabs+1) }}
 {{ add_tabs(tabs) }}{% endfor -%} }
-{% elif val is iterable and (var is not string and var is not mapping) %}{% for v in val %}{{ add_tabs(tabs) }}{{ key }} {{ v }};{% endfor %}
+{% elif val is iterable and (val is not string and val is not mapping) %}{% for v in val %}{{ add_tabs(tabs) }}{{ key }} {{ v }};{% endfor %}
 {%- else -%}
 {{ add_tabs(tabs) }}{{ key }} {{ val }};
 {%- endif -%}

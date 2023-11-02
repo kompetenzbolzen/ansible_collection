@@ -21,6 +21,7 @@
 - name: dearmor key
   shell: gpg --dearmor /usr/share/keyrings/grafana-keyring.key > /usr/share/keyrings/grafana-keyring.asc
   when: key_download.changed
+  become: yes
 
 - name: Update APT cache
   apt:

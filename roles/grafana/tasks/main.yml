@@ -7,7 +7,7 @@
 - name: Install Grafana STABLE Repository
   copy:
     dest: /etc/apt/sources.list.d/grafana.list
-    content: 'deb [signed-by=/usr/share/keyrings/grafana-keyring.asc] https://packages.grafana.com/oss/deb stable main'
+    content: 'deb [signed-by=/usr/share/keyrings/grafana-keyring.asc] https://apt.grafana.com stable main'
   become: yes
   register: install_repo
 

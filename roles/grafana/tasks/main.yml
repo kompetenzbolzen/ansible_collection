@@ -14,8 +14,13 @@
 - name: Install Grafana Repo Key
   get_url:
     url: https://packages.grafana.com/gpg.key
-    dest: /usr/share/keyrings/grafana-keyring.asc
+    dest: /usr/share/keyrings/grafana-keyring.key
   become: yes
+  register: key_download
+
+- name: dearmor key
+  shell: gpg --dearmor /usr/share/keyrings/grafana-keyring.key > /usr/share/keyrings/grafana-keyring.asc
+  when: key_download.changed
 
 - name: Update APT cache
   apt:

@@ -12,7 +12,7 @@
 
 - name: Download Gitea
   get_url:
-    url: 'https://dl.gitea.io/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64'
+    url: 'https://dl.gitea.com/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64'
     checksum: 'sha256:{{ gitea_sha256 }}'
     dest: /usr/local/bin/gitea
     owner: root

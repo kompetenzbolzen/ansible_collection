@@ -39,7 +39,7 @@
 
 - name: pull sha256sum
   uri:
-    url: 'https://dl.gitea.io/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64.sha256'
+    url: 'https://dl.gitea.com/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64.sha256'
     method: GET
     return_content: yes
   register: gitea_sha256_raw

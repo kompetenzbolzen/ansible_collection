@@ -2,7 +2,10 @@
 
 normal gitea `app.ini` config parameters can be passed under `config.`
 
-Available vars: `jwt_sec.content`, `int_tok.content`, `sec_key.content`
+Available vars: `jwt_sec.content`, `int_tok.content`, `sec_key.content`.
+These vars are base64 encoded and can be decoded with the `b64decode` filter.
+This only matters for the `JWT_SECRET`.
+
 
 ```yaml
 ---

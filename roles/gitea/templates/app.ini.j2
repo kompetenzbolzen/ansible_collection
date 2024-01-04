@@ -1,88 +1,19 @@
 ; vi: ft=dosini
+; This file is managed by Ansible. Manual changes will be overridden.
+; DO NOT CHANGE!
 
-APP_NAME = {{ gitea.name }}
-RUN_USER = git
-RUN_MODE = prod
+{% macro procval(key, val) -%}
+{% if val is mapping %}
+[{{ key }}]
+{% for k, v in val.items() %}{{ procval(k,v) }}
+{% endfor -%}
+{%- elif val is sameas true or val is sameas false -%}
+{{ key }} = {{ val | string | lower }}
+{%- else -%}
+{{ key }} = {{ val }}
+{%- endif -%}
+{% endmacro %}
 
-[repository]
-ROOT = /home/git/gitea-repositories
-
-[server]
-APP_DATA_PATH = /var/lib/gitea/data
-PROTOCOL = https
-DOMAIN = {{ ansible_facts.fqdn }}
-ROOT_URL = {{ gitea.root_url }}
-STATIC_URL_PREFIX =
-HTTP_ADDR = 0.0.0.0
-HTTP_PORT = 8443
-LOCAL_ROOT_URL = %(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/
-DISABLE_SSH = false
-SSH_DOMAIN = %(DOMAIN)s
-SSH_PORT = 22
-SSH_CREATE_AUTHORIZED_KEYS_FILE = true
-SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE = true
-
-CERT_FILE = {{ gitea.ssl.cert }}
-KEY_FILE = {{ gitea.ssl.key }}
-
-LANDING_PAGE = login
-
-[database]
-DB_TYPE = mysql
-HOST = {{ gitea.mysql.host }}
-NAME = {{ gitea.mysql.db }}
-USER = {{ gitea.mysql.user }}
-PASSWD = `{{ gitea.mysql.passwd }}`
-SSL_MODE = true
-CHARSET = utf8mb4
-
-[security]
-INSTALL_LOCK = true
-SECRET_KEY = {{ sec_key.content }}
-DISABLE_GIT_HOOKS = true
-INTERNAL_TOKEN = {{ int_tok.content }}
-
-[service]
-DISABLE_REGISTRATION = true
-
-REQUIRE_SIGNIN_VIEW = {{ gitea.require_signing_view }}
-ENABLE_NOTIFY_MAIL = {{ gitea.mail.enable }}
-
-
-[webhook]
-ALLOWED_HOST_LIST = {{ gitea.webhook_allowed_hosts }}
-
-[mailer]
-ENABLED = {{ gitea.mail.enable }}
-{% if gitea.mail.enable %}
-SUBJECT_PREFIX = {{ gitea.mail.subject_prefix }}
-HOST = {{ gitea.mail.smtp_host }}
-SKIP_VERIFY = {{ gitea.mail.skip_verify }}
-IS_TLS_ENABLED = {{ gitea.mail.tls }}
-FROM = {{ gitea.mail.from }}
-USER = {{ gitea.mail.user }}
-PASSWD = `{{ gitea.mail.pass }}`
-SEND_AS_PLAIN_TEXT = {{ gitea.mail.plain_text }}
-MAILER_TYPE = smtp
-SENDMAIL_PATH = sendmail
-SENDMAIL_ARGS =
-SENDMAIL_TIMEOUT = 5m
-
-[queue.mailer]
-SEND_BUFFER_LEN = 100
-{% endif %}
-
-[log]
-MODE = console
-ROUTER_LOG_LEVEL = Info
-ROUTER = console
-
-[git]
-PATH =
-
-[oauth2]
-ENABLE = false
-
-[actions]
-ENABLED = {{ gitea.actions }}
-
+{% for key in gitea.config -%}
+{{ procval(key, gitea.config[key]) }}
+{% endfor %}

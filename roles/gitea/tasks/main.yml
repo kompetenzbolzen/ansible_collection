@@ -37,6 +37,27 @@
     state: directory
   become: yes
 
+- name: Create secrets if needed
+  include_tasks: secrets.yml
+
+- name: Read secret Key
+  slurp:
+    src: /etc/gitea/secret_key
+  become: yes
+  register: sec_key
+
+- name: Read internal token
+  slurp:
+    src: /etc/gitea/internal_token
+  become: yes
+  register: int_tok
+
+- name: Read JWT Secret
+  slurp:
+    src: /etc/gitea/jwt_secret
+  become: yes
+  register: jwt_sec
+
 - name: pull sha256sum
   uri:
     url: 'https://dl.gitea.com/gitea/{{ gitea.version.ver }}/gitea-{{ gitea.version.ver }}-linux-amd64.sha256'
@@ -60,21 +81,6 @@
   include: update.yml
   when:
     - (not gitea_bin_stat.stat.exists) or (gitea_bin_stat.stat.checksum != gitea_sha256)
-
-- name: Check if initial setup is needed
-  include_tasks: secrets.yml
-
-- name: Read secret Key
-  slurp:
-    src: /etc/gitea/secret_key
-  become: yes
-  register: sec_key
-
-- name: Read secret Key
-  slurp:
-    src: /etc/gitea/internal_token
-  become: yes
-  register: int_tok
 
 - name: Install gitea config file
   template:

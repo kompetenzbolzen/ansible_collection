@@ -14,7 +14,7 @@
       - existing_cert.valid_at.point_1
       - not existing_cert.failed
       - existing_cert.subject.commonName == common_name
-      - existing_cert.issuer.commonName == '{{ signed_certificate.issuer_cn }}'
+      - existing_cert.issuer.commonName == signed_certificate.issuer_cn
     success_msg: Certificate is valid
     fail_msg: Certificate is not valid. creating a new one.
   ignore_errors: yes

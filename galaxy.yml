@@ -1,6 +1,6 @@
 namespace: kompetenzbolzen
 name: stuff
-version: 0.22.2
+version: 0.22.3
 readme: README.md
 authors:
 - Jonas Gunz <himself@jonasgunz.de>
@@ -19,6 +19,6 @@ tags:
 # range specifiers can be set and are separated by ','
 dependencies:
   community.general: '>=3.6.0'
-  community.crypto: '>=1.8.0'
+  community.crypto: '>=2.17.0'
 #build_ignore: []
 

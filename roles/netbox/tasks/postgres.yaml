@@ -1,0 +1,59 @@
+---
+- name: Generate Database Password
+  command:
+    cmd: 'bash -c "dd if=/dev/urandom bs=1 count=50 status=none | base64"'
+    creates: /opt/netbox_data/db_key
+  become_user: netbox
+  become: true
+  register: gen_db_key
+
+- name: Save DB Key
+  copy:
+    content: '{{ gen_sec_key.stdout }}'
+    dest: /opt/netbox_data/db_key
+    owner: root
+    group: netbox
+    mode: '640'
+  become: true
+  when: gen_db_key.changed
+
+- name: Read DB Key
+  slurp:
+    src: /opt/netbox_data/db_key
+  become: true
+  register: db_key
+
+- name: Set DB Key
+  set_fact:
+    postgres_netbox_db_key: '{{ db_key.content | b64decode }}'
+    cache: false
+
+- name: install Packages
+  apt:
+    name:
+      - python3-psycopg2
+      - postgresql
+  become: true
+
+- name: Create netbox DB
+  community.postgresql.postgresql_db:
+    name: netbox
+  become_user: postgres
+  become: true
+
+- name: Create netbox DB User
+  community.postgresql.postgresql_user:
+    db: netbox
+    name: netbox
+    password: '{{ postgres_netbox_db_key }}'
+  become_user: postgres
+  become: true
+
+- name: Change netbox DB Owner
+  community.postgresql.postgresql_owner:
+    db: netbox
+    new_owner: netbox
+    obj_type: database
+    obj_name: netbox
+  become_user: postgres
+  become: true

@@ -1,0 +1,22 @@
+---
+- name: Handle systemd
+  systemd:
+    name: netbox
+    state: restarted
+  become: true
+
+- name: Daemon reload
+  systemd:
+    daemon_reload: true
+  become: true
+
+- name: Enable units
+  systemd:
+    name: '{{ item }}'
+    enabled: true
+    state: started
+  become: true
+  loop:
+    - netbox-rq.service
+    - netbox.service
+    - netbox-housekeeping.timer

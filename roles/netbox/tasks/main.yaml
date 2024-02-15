@@ -1,0 +1,146 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - redis-server
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+      - build-essential
+      - libxml2-dev
+      - libxslt1-dev
+      - libffi-dev
+      - libpq-dev
+      - libssl-dev
+      - zlib1g-dev
+      # LDAP
+      - libldap2-dev
+      - libsasl2-dev
+      - libssl-dev
+  become: true
+
+- name: Create User
+  user:
+    name: netbox
+    system: true
+  become: true
+
+- name: Create folder
+  file:
+    path: /opt/netbox_data
+    owner: netbox
+    state: directory
+  become: true
+
+- name: Generate SECRET_KEY
+  command:
+    cmd: 'bash -c "dd if=/dev/urandom bs=1 count=50 status=none | base64"'
+    creates: /opt/netbox_data/secret_key
+  become_user: netbox
+  become: true
+  register: gen_sec_key
+
+- name: Save secret Key
+  copy:
+    content: '{{ gen_sec_key.stdout }}'
+    dest: /opt/netbox_data/secret_key
+    owner: root
+    group: netbox
+    mode: '640'
+  become: true
+  when: gen_sec_key.changed
+
+- name: Read secret Key
+  slurp:
+    src: /opt/netbox_data/secret_key
+  become: true
+  register: sec_key
+
+- name: Install PostgreSQL
+  include_tasks: postgres.yaml
+  when: netbox_local_postgres
+
+- name: Download netbox
+  get_url:
+    url: 'https://github.com/netbox-community/netbox/archive/refs/tags/v{{ netbox_version }}.tar.gz'
+    dest: '/opt/netbox_data/netbox_{{ netbox_version }}.tar.gz'
+  become: true
+  become_user: netbox
+  register: archive_download
+  notify:
+    - Handle systemd
+
+- name: Unpack netbox
+  unarchive:
+    src: '/opt/netbox_data/netbox_{{ netbox_version }}.tar.gz'
+    remote_src: true
+    dest: '/opt/netbox_data/'
+  become: true
+  become_user: netbox
+  when: archive_download.changed
+
+- name: create link to right version
+  file:
+    state: link
+    path: /opt/netbox
+    src: '/opt/netbox_data/netbox-{{ netbox_version }}'
+  become: true
+
+- name: Create the configuration
+  template:
+    src: configuration.py.j2
+    dest: /opt/netbox/netbox/netbox/configuration.py
+    owner: netbox
+  become: true
+  notify:
+    - Handle systemd
+
+- name: Add LDAP dependencies to requirements.txt
+  copy:
+    content: 'django-auth-ldap'
+    dest: /opt/netbox/local_requirements.txt
+    owner: netbox
+  become: true
+
+- name: Install LDAP Configuration
+  copy:
+    dest: /opt/netbox/netbox/netbox/ldap_config.py
+    content: '{{ ldap_config }}'
+    owner: netbox
+  become: true
+  when: ldap_enable
+  notify:
+    - Handle systemd
+
+- name: Install Gunicorn Configuration file
+  template:
+    src: gunicorn.py.j2
+    dest: '/opt/netbox/gunicorn.py'
+    owner: netbox
+  become: true
+  notify:
+    - Handle systemd
+
+- name: Install Gunicorn Unit files
+  copy:
+    remote_src: true
+    src: '/opt/netbox/contrib/{{ item }}'
+    dest: '/etc/systemd/system/{{ item }}'
+  become: true
+  loop:
+    - netbox-housekeeping.service
+    - netbox-rq.service
+    - netbox.service
+    - netbox-housekeeping.timer
+  notify:
+    - Handle systemd
+    - Daemon reload
+    - Enable units
+
+- name: Run the upgrade script
+  command:
+    cmd: /opt/netbox/upgrade.sh
+  become: true
+  become_user: netbox
+  when: archive_download.changed

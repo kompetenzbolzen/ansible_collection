@@ -1,0 +1,18 @@
+# vi: ft=python
+# This file is created by Ansible. DO NOT CHANGE!
+
+{% macro procval(val) -%}
+{% if val is string -%}"{{ val }}"
+{%- elif val is sameas true or val is sameas false -%}{{ val | string }}
+{%- elif val is mapping %}{
+{% for k, v in val.items() %}{{ prockv_map(k,v) }},
+{% endfor %} }
+{% elif val is iterable %}[ {%+ for v in val %}{{ procval(v) }}{{ ", " if not loop.last else "" }} {% endfor %} ]
+{%- else -%}{{ val }}{%- endif %}
+{%- endmacro %}
+{% macro prockv(key, val) %}{{ key }} = {{ procval(val) }}{%- endmacro %}
+{% macro prockv_map(key, val) %}"{{ key }}" : {{ procval(val) }}{%- endmacro %}
+
+{% for key in netbox_config %}
+{{ prockv(key, netbox_config[key]) }}
+{% endfor %}

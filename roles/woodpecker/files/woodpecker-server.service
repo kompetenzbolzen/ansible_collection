@@ -1,0 +1,17 @@
+[Unit]
+Description=Woodpecker Server
+After=syslog.target
+After=network.target
+
+[Service]
+RestartSec=2s
+Type=simple
+User=woodpecker
+Group=woodpecker
+WorkingDirectory=/var/lib/woodpecker/
+ExecStart=/usr/local/bin/woodpecker-server
+Restart=always
+EnvironmentFile=/etc/woodpecker_server
+
+[Install]
+WantedBy=multi-user.target

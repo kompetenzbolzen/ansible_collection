@@ -1,0 +1,43 @@
+---
+- name: Create User
+  user:
+    name: woodpecker
+    home: /var/lib/woodpecker
+    shell: /bin/bash
+    system: true
+    state: present
+  become: true
+
+- name: Download DEB
+  get_url:
+    url: 'https://github.com/woodpecker-ci/woodpecker/releases/download/v{{ woodpecker_ver }}/woodpecker-server_{{ woodpecker_ver }}_amd64.deb'
+    dest: /var/lib/woodpecker/server.deb
+  become: true
+
+- name: Install DEB
+  apt:
+    deb: /var/lib/woodpecker/server.deb
+  become: true
+  notify:
+    - Handle systemd
+
+- name: Install woodpecker unit file
+  copy:
+    src: woodpecker-server.service
+    dest: /etc/systemd/system/woodpecker-server.service
+  become: true
+  notify:
+    - Handle systemd
+
+- name: Create config file
+  template:
+    src: woodpecker.j2
+    dest: /etc/woodpecker_server
+    owner: root
+    group: woodpecker
+    mode: '640'
+  become: true
+  loop:
+    - '{{ woodpecker_server }}'
+  notify:
+    - Handle systemd

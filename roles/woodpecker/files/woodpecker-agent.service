@@ -1,0 +1,17 @@
+[Unit]
+Description=Woodpecker Agent
+After=syslog.target
+After=network.target
+
+[Service]
+RestartSec=2s
+Type=simple
+User=woodpecker-agent
+Group=woodpecker-agent
+WorkingDirectory=/var/lib/woodpecker-agent/
+ExecStart=/usr/local/bin/woodpecker-agent
+Restart=always
+EnvironmentFile=/etc/woodpecker_agent
+
+[Install]
+WantedBy=multi-user.target

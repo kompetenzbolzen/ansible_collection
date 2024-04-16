@@ -1,0 +1,14 @@
+---
+- name: Handle systemd
+  systemd:
+    name: woodpecker-server
+    enabled: true
+    state: restarted
+  become: true
+
+- name: Handle systemd agent
+  systemd:
+    name: woodpecker-agent
+    enabled: true
+    state: restarted
+  become: true

@@ -1,0 +1,104 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - podman
+      - dbus-user-session
+      - slirp4netns
+      - rootlesskit
+  become: true
+
+- name: Create agent User
+  user:
+    name: woodpecker-agent
+    home: /var/lib/woodpecker-agent
+    shell: /bin/bash
+    system: true
+    state: present
+  become: true
+  # agent_user.results.uid
+  register: agent_user
+
+- name: Create config dir
+  file:
+    path: /etc/woodpecker
+    state: directory
+    owner: woodpecker-agent
+    group: woodpecker-agent
+  become: true
+
+- name: Enable systemd lingering for woodpecker-agent
+  command: loginctl enable-linger woodpecker-agent
+  #file:
+  #  path: /var/lib/systemd/linger/woodpecker-agent
+  #  state: touch
+  become: true
+
+- name:
+  lineinfile:
+    path: '{{ item.p }}'
+    line: '{{ item.c }}'
+  loop:
+    - p: /etc/subuid
+      c: 'woodpecker-agent:165536:65536'
+    - p: /etc/subgid
+      c: 'woodpecker-agent:165536:65536'
+  become: true
+
+  # this is needed for woodpecker to detect stopeed containers
+  # https://github.com/containers/podman/issues/19581
+- name: Create .config/containes
+  file:
+    path: /var/lib/woodpecker-agent/.config/containers
+    state: directory
+  become_user: woodpecker-agent
+  become: true
+- name: Install containers.conf
+  copy:
+    src: containers.conf
+    dest: /var/lib/woodpecker-agent/.config/containers/containers.conf
+  become: true
+
+- name: Enable docker socket
+  systemd_service:
+    name: podman.socket
+    scope: user
+    enabled: true
+    state: started
+  become_user: woodpecker-agent
+  become: true
+
+- name: Download DEB
+  get_url:
+    url: 'https://github.com/woodpecker-ci/woodpecker/releases/download/v{{ woodpecker_ver }}/woodpecker-agent_{{ woodpecker_ver }}_amd64.deb'
+    dest: /var/lib/woodpecker-agent/agent.deb
+  become: true
+
+- name: Install DEB
+  apt:
+    deb: /var/lib/woodpecker-agent/agent.deb
+  become: true
+  notify:
+    - Handle systemd agent
+
+- name: Install woodpecker unit file
+  copy:
+    src: woodpecker-agent.service
+    dest: /etc/systemd/system/woodpecker-agent.service
+  become: true
+  notify:
+    - Handle systemd agent
+
+- name: Create config file
+  template:
+    src: woodpecker.j2
+    dest: /etc/woodpecker_agent
+    owner: root
+    group: woodpecker-agent
+    mode: '640'
+  become: true
+  loop:
+    - '{{ woodpecker_agent |
+      ansible.builtin.combine({"DOCKER_HOST":"unix:///run/user/{{ agent_user.uid }}/podman/podman.sock"}) }}'
+  notify:
+    - Handle systemd agent

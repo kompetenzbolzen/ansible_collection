@@ -1,0 +1,9 @@
+---
+
+- name: Run server install
+  include_tasks: server.yaml
+  when: woodpecker_server_enable
+
+- name: Run agent install
+  include_tasks: agent.yaml
+  when: woodpecker_agent_enable

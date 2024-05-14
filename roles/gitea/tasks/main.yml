@@ -78,7 +78,7 @@
   ignore_errors: yes
 
 - name: perform update
-  include: update.yml
+  include_tasks: update.yml
   when:
     - (not gitea_bin_stat.stat.exists) or (gitea_bin_stat.stat.checksum != gitea_sha256)
 

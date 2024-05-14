@@ -92,5 +92,5 @@
   register: version_check
 
 - name: Install new factorio version
-  include: update.yml
+  include_tasks: update.yml
   when: version_check.failed

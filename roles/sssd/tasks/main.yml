@@ -1,11 +1,6 @@
 ---
-- name: Install packages
-  apt:
-    name:
-      - sssd
-      - libpam-sss
-      - libnss-sss
-  become: yes
+- name: Include distribution specific install tasks
+  include_tasks: '{{ ansible_facts.os_family | lower }}.yaml'
 
 - name: Install SSSD Config file
   template:

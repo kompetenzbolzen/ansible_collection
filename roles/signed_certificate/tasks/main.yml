@@ -3,11 +3,8 @@
   set_fact:
     cert_changed: False
 
-- name: Install crypt libs
-  apt:
-    name:
-      - python3-cryptography
-  become: yes
+- name: Include distribution specific install tasks
+  include_tasks: '{{ ansible_facts.os_family | lower }}.yaml'
 
 - name: Check for OpenSSL Private Key
   community.crypto.openssl_privatekey_info:

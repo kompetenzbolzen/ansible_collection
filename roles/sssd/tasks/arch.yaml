@@ -1,0 +1,6 @@
+---
+- name: Install packages with pacman
+  community.general.pacman:
+    name:
+      - sssd
+  become: yes

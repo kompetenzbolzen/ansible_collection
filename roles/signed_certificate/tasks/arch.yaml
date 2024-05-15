@@ -1,0 +1,7 @@
+---
+---
+- name: Install crypt libs
+  community.general.pacman:
+    name:
+      - python-cryptography
+  become: yes

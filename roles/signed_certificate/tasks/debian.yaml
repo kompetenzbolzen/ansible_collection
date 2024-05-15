@@ -1,0 +1,6 @@
+---
+- name: Install crypt libs
+  apt:
+    name:
+      - python3-cryptography
+  become: yes

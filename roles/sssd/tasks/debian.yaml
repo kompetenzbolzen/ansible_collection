@@ -1,0 +1,8 @@
+---
+- name: Install packages with apt
+  apt:
+    name:
+      - sssd
+      - libpam-sss
+      - libnss-sss
+  become: yes

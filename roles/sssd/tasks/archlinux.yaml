@@ -3,4 +3,5 @@
   community.general.pacman:
     name:
       - sssd
+      - nss-pam-ldapd
   become: yes

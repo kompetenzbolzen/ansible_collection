@@ -64,6 +64,15 @@
     method: GET
     return_content: yes
   register: gitea_sha256_raw
+  when: not gitea_use_forgejo
+
+- name: pull forgejo sha256sum
+  uri:
+    url: 'https://codeberg.org/forgejo/forgejo/releases/download/v{{ gitea.version.ver }}/forgejo-{{ gitea.version.ver }}-linux-amd64.sha256'
+    method: GET
+    return_content: yes
+  register: gitea_sha256_raw
+  when: gitea_use_forgejo
 
 - name: set sha256sum
   set_fact:

@@ -21,3 +21,17 @@
   become: yes
   notify:
     - Handle systemd
+  when: not gitea_use_forgejo
+
+- name: Download forgejo
+  get_url:
+    url: 'https://codeberg.org/forgejo/forgejo/releases/download/v{{ gitea.version.ver }}/forgejo-{{ gitea.version.ver }}-linux-amd64'
+    checksum: 'sha256:{{ gitea_sha256 }}'
+    dest: /usr/local/bin/gitea
+    owner: root
+    group: root
+    mode: '755'
+  become: yes
+  notify:
+    - Handle systemd
+  when: gitea_use_forgejo

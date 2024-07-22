@@ -71,13 +71,20 @@
     url: 'https://codeberg.org/forgejo/forgejo/releases/download/v{{ gitea.version.ver }}/forgejo-{{ gitea.version.ver }}-linux-amd64.sha256'
     method: GET
     return_content: yes
-  register: gitea_sha256_raw
+  register: forgejo_sha256_raw
   when: gitea_use_forgejo
 
 - name: set sha256sum
   set_fact:
     gitea_sha256: '{{ (gitea_sha256_raw.content | split(" "))[0] }}'
     cacheable: false
+  when: not gitea_use_forgejo
+
+- name: set sha256sum
+  set_fact:
+    gitea_sha256: '{{ (forgejo_sha256_raw.content | split(" "))[0] }}'
+    cacheable: false
+  when: gitea_use_forgejo
 
 - name: Check for update
   stat:

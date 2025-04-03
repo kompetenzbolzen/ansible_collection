@@ -38,6 +38,7 @@
 - name: Create netbox DB
   community.postgresql.postgresql_db:
     name: netbox
+    encoding: UTF8
   become_user: postgres
   become: true
 

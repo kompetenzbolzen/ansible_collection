@@ -11,7 +11,20 @@
   copy:
     content: |
       SAVEFILE={{ factorio_servers[factorio_server_name].save }}
+      PORT={{ factorio_servers[factorio_server_name].port }}
     dest: /opt/factorio/{{ factorio_server_name }}/cfg.sh
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+- name: Install server config.ini
+  copy:
+    content: |
+      [path]
+      read-data=__PATH__executable__/../../data
+      write-data=/opt/factorio/{{ factorio_server_name }}
+    dest: /opt/factorio/{{ factorio_server_name }}/config.ini
     owner: factorio
     group: factorio
   become: yes

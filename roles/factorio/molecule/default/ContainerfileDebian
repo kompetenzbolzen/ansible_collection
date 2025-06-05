@@ -1,0 +1,9 @@
+# debian bookworm container with systemd
+FROM docker.io/debian:bookworm-slim
+
+# with extra packages: systemd (for service testing in the container), python3 (for virtualenvs), git
+RUN apt-get update && apt-get -y upgrade && apt-get install -y curl gnupg systemd libpam-systemd git python3 python3-pip python3-virtualenv sudo ; \
+    apt-get clean
+
+CMD /usr/bin/systemd
+

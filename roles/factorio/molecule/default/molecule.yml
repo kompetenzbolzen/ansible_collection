@@ -1,0 +1,22 @@
+---
+driver:
+  name: podman
+  options:
+    managed: false
+    login_cmd_template: "podman exec -it {instance} bash"
+    ansible_connection_options:
+      ansible_connection: podman
+platforms:
+  - name: factorio_instance_debian
+    image: docker.io/debian:bookworm-slim
+    pre_build_image: false
+    command: /usr/bin/systemd
+    dockerfile: ./ContainerfileDebian
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../../roles"
+

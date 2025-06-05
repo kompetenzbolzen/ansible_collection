@@ -1,12 +1,10 @@
 ---
 # Only use to pin to specific version
 # factorio_version: ''
-factorio_save: 'gamesave'
-
-factorio_admins: []
 
 # Server configuration. consult the example json files for reference
-factorio_config:
+factorio_default_config: &factorio_defaults
+  save: 'gamesave'
   mapgen:
     terrain_segmentation: 1
     water: 1
@@ -193,3 +191,11 @@ factorio_config:
     minimum_segment_size_peer_count: 20
     maximum_segment_size: 100
     maximum_segment_size_peer_count: 10
+
+factorio_servers:
+  myserver:
+    <<: *factorio_defaults
+    save: 'gamesave'
+
+factorio_admins: []
+

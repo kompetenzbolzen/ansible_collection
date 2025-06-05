@@ -1,0 +1,33 @@
+---
+- name: Create instance folder
+  file:
+    path: /opt/factorio/{{ factorio_server_name }}/
+    state: directory
+    owner: factorio
+    group: factorio
+  become: yes
+
+- name: Install instance running config
+  copy:
+    content: |
+      SAVEFILE={{ factorio_servers[factorio_server_name].save }}
+    dest: /opt/factorio/{{ factorio_server_name }}/cfg.sh
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Install JSON configs
+  copy:
+    content: '{{ factorio_servers[factorio_server_name][item] | to_json }}'
+    dest: '/opt/factorio/{{ factorio_server_name }}/{{ item }}-config.json'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+  loop:
+    - mapgen
+    - map
+    - server

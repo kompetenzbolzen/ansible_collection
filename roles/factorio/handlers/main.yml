@@ -1,7 +1,8 @@
 ---
 - name: Handle systemd
   systemd:
-    name: factorio.service
+    name: 'factorio@{{ item }}.service'
     state: restarted
     enabled: yes
   become: yes
+  loop: '{{ factorio_servers.keys() }}'

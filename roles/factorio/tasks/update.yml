@@ -1,9 +1,11 @@
 ---
-- name: Stop factorio
+- name: Stop factorio instances
   systemd:
-    name: factorio.service
+    name: 'factorio@{{ item }}.service'
     state: stopped
   become: yes
+  loop: '{{ factorio_servers.keys() }}'
+  ignore_errors: yes
 
 - name: Download factorio
   get_url:

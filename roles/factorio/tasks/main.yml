@@ -23,60 +23,6 @@
     cachaeble: no
   when: factorio_version is not defined
 
-- name: Install runscript
-  copy:
-    src: run.sh
-    dest: /opt/factorio/run.sh
-    mode: '750'
-    owner: factorio
-    group: factorio
-  become: yes
-  notify:
-    - Handle systemd
-
-- name: Install running config
-  copy:
-    content: |
-      SAVEFILE={{ factorio_save }}
-    dest: /opt/factorio/cfg.sh
-    owner: factorio
-    group: factorio
-  become: yes
-  notify:
-    - Handle systemd
-
-- name: Install JSON configs
-  copy:
-    content: '{{ factorio_config[item] | to_json }}'
-    dest: '/opt/factorio/{{ item }}-config.json'
-    owner: factorio
-    group: factorio
-  become: yes
-  notify:
-    - Handle systemd
-  loop:
-    - mapgen
-    - map
-    - server
-
-- name: Install admin file
-  copy:
-    content: '{{ factorio_admins | to_json }}'
-    dest: '/opt/factorio/factorio/server-adminlist.json'
-    owner: factorio
-    group: factorio
-  become: yes
-  notify:
-    - Handle systemd
-
-- name: systemd units
-  copy:
-    dest: '/etc/systemd/system/factorio.service'
-    src: factorio.service
-  become: yes
-  notify:
-    - Handle systemd
-
 - name: Determine factorio version
   slurp:
     src: /opt/factorio/factorio/data/base/info.json
@@ -94,3 +40,38 @@
 - name: Install new factorio version
   include_tasks: update.yml
   when: version_check.failed
+
+- name: Install runscript
+  copy:
+    src: run.sh
+    dest: /opt/factorio/run.sh
+    mode: '750'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: Server configuration
+  include_tasks: server_instance.yml
+  loop: '{{ factorio_servers.keys() }}'
+  loop_control:
+    loop_var: factorio_server_name
+
+- name: Install admin file
+  copy:
+    content: '{{ factorio_admins | to_json }}'
+    dest: '/opt/factorio/factorio/server-adminlist.json'
+    owner: factorio
+    group: factorio
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: systemd units
+  copy:
+    dest: '/etc/systemd/system/factorio@.service'
+    src: factorio@.service
+  become: yes
+  notify:
+    - Handle systemd

@@ -122,6 +122,19 @@
   notify:
     - Handle systemd
 
+- name: remove deprecated units
+  file:
+    path: '/etc/systemd/system/{{ item }}'
+    state: absent
+  become: true
+  loop:
+    - netbox-housekeeping.service
+    - netbox-housekeeping.timer
+  notify:
+    - Handle systemd
+    - Daemon reload
+    - Enable units
+
 - name: Install Gunicorn Unit files
   copy:
     remote_src: true

@@ -1,5 +1,5 @@
 ---
-netbox_version: '3.7.2'
+netbox_version: '4.4.0'
 netbox_local_postgres: true
 netbox_config:
   CSRF_TRUSTED_ORIGINS:

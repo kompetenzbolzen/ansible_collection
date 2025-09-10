@@ -142,10 +142,8 @@
     dest: '/etc/systemd/system/{{ item }}'
   become: true
   loop:
-    - netbox-housekeeping.service
     - netbox-rq.service
     - netbox.service
-    - netbox-housekeeping.timer
   notify:
     - Handle systemd
     - Daemon reload

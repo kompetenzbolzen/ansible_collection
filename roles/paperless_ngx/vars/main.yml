@@ -1,0 +1,6 @@
+---
+paperless_services:
+  - paperless-webserver.service
+  - paperless-consumer.service
+  - paperless-scheduler.service
+  - paperless-task-queue.service

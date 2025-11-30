@@ -1,0 +1,163 @@
+---
+- name: Install packages
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-dev
+      - python3-setuptools
+      - python3-wheel
+      - python3-virtualenv
+      - default-libmysqlclient-dev
+      - libpq-dev
+      - fonts-liberation
+      - imagemagick
+      - gnupg
+      - libmagic-dev
+      - mariadb-client
+      - mime-support
+      - libzbar0
+      - poppler-utils
+      - build-essential
+      - unpaper
+      - ghostscript
+      - icc-profiles-free
+      - qpdf
+      - liblept5
+      - libxml2
+      - pngquant
+      - zlib1g
+      - tesseract-ocr
+      - redis
+      - pkg-config
+  become: yes
+
+- name: Create User
+  user:
+    name: paperless
+    home: /opt/paperless
+    system: yes
+    state: present
+  become: yes
+
+- name: Folder structure
+  file:
+    path: '{{ item }}'
+    state: directory
+  become: yes
+  become_user: paperless
+  loop:
+    - /opt/paperless/media
+    - /opt/paperless/data
+    - /opt/paperless/consume
+
+- name: Generate SECRET_KEY
+  command:
+    cmd: openssl rand --base64 32
+    creates: /opt/paperless/secret_key
+  register: gen_sec_key
+
+- name: Save secret Key
+  copy:
+    content: '{{ gen_sec_key.stdout }}'
+    dest: /opt/paperless/secret_key
+    owner: root
+    group: paperless
+    mode: '640'
+  become: yes
+  when: gen_sec_key.changed
+
+- name: Read secret Key
+  slurp:
+    src: /opt/paperless/secret_key
+  become: yes
+  register: sec_key
+
+- name: Download paperless
+  get_url:
+    url: 'https://github.com/paperless-ngx/paperless-ngx/releases/download/v{{ paperless.version }}/paperless-ngx-v{{ paperless.version }}.tar.xz'
+    force: false
+    dest: /opt/paperless
+    owner: paperless
+    group: paperless
+    mode: '755'
+  become: yes
+  register: download
+
+- name: extract paperless
+  unarchive:
+    src: '{{ download.dest }}'
+    dest: /opt/paperless
+    remote_src: yes
+    extra_opts:
+      - --transform
+      - 's|^paperless-ngx|.|'
+  become: yes
+  become_user: paperless
+  when: download.changed
+  notify:
+    - Handle systemd
+
+- name: reset virtualenv
+  file:
+    path: /opt/paperless/venv
+    state: absent
+  become: yes
+  become_user: paperless
+  when: download.changed
+
+- name: install pip dependencies
+  pip:
+    requirements: /opt/paperless/requirements.txt
+    virtualenv: /opt/paperless/venv
+  become: yes
+  become_user: paperless
+  when: download.changed
+
+- name: install configuration
+  template:
+    src: paperless.conf.j2
+    dest: /opt/paperless/paperless.conf
+    owner: paperless
+    group: paperless
+  become: yes
+  notify:
+    - Handle systemd
+
+- name: migrate database
+  shell:
+    cmd: '/opt/paperless/venv/bin/python3 manage.py migrate'
+    executable: /bin/bash
+    chdir: /opt/paperless/src
+  become: yes
+  become_user: paperless
+  when: download.changed
+
+- name: Install paperless unit file
+  copy:
+    src: '/opt/paperless/scripts/{{ item }}'
+    dest: '/etc/systemd/system/{{ item }}'
+    remote_src: true
+  become: yes
+  loop: '{{paperless_services}}'
+  notify:
+    - Handle systemd
+
+- name: create plugin dirs
+  file:
+    path: '/etc/systemd/system/{{item}}.d/'
+    state: directory
+  become: yes
+  loop: '{{paperless_services}}'
+
+- name: create overrides
+  copy:
+    dest: '/etc/systemd/system/{{item}}.d/override.conf'
+    content: |
+      [Service]
+      Environment=PATH=/opt/paperless/venv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+      ExecSearchPath=/opt/paperless/venv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+  become: yes
+  loop: '{{paperless_services}}'
+  notify:
+    - Handle systemd

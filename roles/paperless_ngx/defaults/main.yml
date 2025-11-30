@@ -1,0 +1,11 @@
+---
+paperless:
+  version: '1.12.2'
+  url: 'https://paperless.example.com'
+  db:
+    engine: sqlite
+    host: 'mysql.example.com'
+    port: 3306
+    user: 'user'
+    password: 'password'
+    dbname: 'paperless'

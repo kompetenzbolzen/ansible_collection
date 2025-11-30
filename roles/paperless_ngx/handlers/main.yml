@@ -1,0 +1,8 @@
+---
+- name: Handle systemd
+  systemd:
+    name: '{{ item }}'
+    enabled: yes
+    state: restarted
+  loop: '{{paperless_services}}'
+  become: yes

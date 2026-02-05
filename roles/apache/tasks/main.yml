@@ -2,13 +2,13 @@
 - name: Install SURY.ORG package signing key
   get_url:
     url: https://packages.sury.org/php/apt.gpg
-    dest: /etc/apt/trusted.gpg.d/sury.gpg
+    dest: /etc/apt/keyrings/sury.gpg
   become: yes
 
 - name: Install SURY.ORG php package repository
   copy:
     dest: /etc/apt/sources.list.d/sury.list
-    content: 'deb https://packages.sury.org/php/ {{ ansible_facts.distribution_release }} main'
+    content: 'deb [signed-by=/etc/apt/keyrings/sury.gpg] https://packages.sury.org/php/ {{ ansible_facts.distribution_release }} main'
   become: yes
   register: install_repo
 

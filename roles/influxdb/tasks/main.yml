@@ -7,8 +7,8 @@
 
 - name: APT Key
   get_url:
-    url: 'https://repos.influxdata.com/influxdb.key'
-    dest: /etc/apt/keyrings/influxdb.key
+    url: 'https://repos.influxdata.com/influxdata-archive.key'
+    dest: /etc/apt/keyrings/influxdata-archive.key
   become: yes
 
 - name: Install repos

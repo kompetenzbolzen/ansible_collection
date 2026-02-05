@@ -1,7 +1,6 @@
 ---
 - name: Install GnuPG
   apt:
-    update_cache: yes
     name:
       - gnupg2
   become: yes

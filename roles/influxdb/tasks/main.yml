@@ -7,9 +7,9 @@
   become: yes
 
 - name: APT Key
-  apt_key:
+  get_url:
     url: 'https://repos.influxdata.com/influxdb.key'
-    state: present
+    dest: /etc/apt/keyrings/influxdb.key
   become: yes
 
 - name: Install repos

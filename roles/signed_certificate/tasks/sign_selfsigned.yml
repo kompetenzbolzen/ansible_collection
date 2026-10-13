@@ -26,6 +26,14 @@
     group: '{{ group }}'
   become: yes
 
+- name: Install Signed OpenSSL FullChain
+  copy:
+    dest: '{{ cert_path }}/{{ cert_name }}.fullchain.pem'
+    content: '{{ cert.certificate }}\n{{ signed_certificate.cert_content }}'
+    owner: '{{ owner }}'
+    group: '{{ group }}'
+  become: yes
+
 - name: Set cert_changed flag
   set_fact:
     cert_changed: True

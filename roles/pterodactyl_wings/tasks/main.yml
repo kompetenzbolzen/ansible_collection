@@ -4,16 +4,14 @@
     name: gnupg2
   become: yes
 
-- name: Docker APT Key
-  apt_key:
-    url: 'https://download.docker.com/linux/debian/gpg'
-    state: present
-  become: yes
-
 - name: Install Docker APT Repository
-  template:
-    src: docker.list.j2
-    dest: /etc/apt/sources.list.d/docker.list
+  deb822_repository:
+    name: docker
+    signed_by: 'https://download.docker.com/linux/debian/gpg'
+    uris: 'https://download.docker.com/linux/debian'
+    state: present
+    suites: '{{ ansible_facts.distribution_release }}'
+    components: stable
   become: yes
   register: install_repo
 
